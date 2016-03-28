@@ -1,0 +1,12 @@
+[submodule "themes/pelican-bootstrap3"]
+	path = themes/pelican-bootstrap3
+	url = https://github.com/DandyDev/pelican-bootstrap3.git
+[submodule "plugins/ipynb"]
+	path = plugins/ipynb
+	url = https://github.com/danielfrg/pelican-ipynb.git
+[submodule "pelican-plugins"]
+	path = pelican-plugins
+	url = https://github.com/getpelican/pelican-plugins.git
+[submodule "content/notebooks/moleskine"]
+	path = content/notebooks/moleskine
+	url = git@github.com:wtbarnes/moleskine.git
