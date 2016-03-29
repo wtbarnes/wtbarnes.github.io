@@ -1,0 +1,14 @@
+language: python
+python:
+- '2.7'
+sudo: required
+branches:
+  only:
+  - sources
+install:
+- pip install -r requirements.txt
+script:
+- make publish github
+env:
+  global:
+    secure: yOWyIdsIioV5q5cZFH852vvomPyAPe4lIYpuEZlHaeAseWLZ+SPi8UahZrY7yZp3WFG/c02MRunBjR3fv7zAXHyUNRu8StHidFechvMxGsCUuJaEbvfhzl/OKdsKTX8xmmjZqGEwHA63gvk9eeNRMQr4/mEVY13BLvg42KPW7nhwgFoF+x8J9JPcwgH/BWLGoujEX+KTVxzCaBiJ3DxGQbHXFrq4ERtxflfMZloANFf5bN4Gaxk4KI9f1ayYFeS7rINxkfLGxbvVJQ24Lxt5MNyEn0RnKK3AMKXfkDVp0WfkNOg+y4Jd9jQ0jZtXonm5SV192WOcxiohfUBirM2W6tZwkF23fpEyCRQ/ezY6RDI+oP5KagQ9LAiQLWeFfsGeYpZSvuhRmK1TsP7lwAL3tOVUxddMnjQd2AOoWIrZwzpktnn5RMTwtzLs0QuYdbO6aYRuDbd+hGQiTFzKFhI7BHRUniLGn0CdJWLMvOICFNDUVpji+Fhp/nAH4UCp4Ly5wH8wDlKkwcieMb2QqZoPMeAXNigFNmzJi4YcScqs5WIGsI2rtvJbosyL3Ju40UAPEymAGGFnbFsVGvMsVxwwDddoBCWF2u6QSEC/cPcUHUAiihTVJ2O5ft8S+63WlaYLROQ+9Uut+khXVUELlLP1TJ2ndnHsCXch0q9y3rFuRXw=
