@@ -9,4 +9,4 @@
 	url = https://github.com/getpelican/pelican-plugins.git
 [submodule "content/notebooks/moleskine"]
 	path = content/notebooks/moleskine
-	url = git@github.com:wtbarnes/moleskine.git
+	url = https://github.com/wtbarnes/moleskine.git
