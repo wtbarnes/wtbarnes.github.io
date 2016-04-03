@@ -3,7 +3,8 @@
 from __future__ import unicode_literals
 
 THEME='themes/pelican-bootstrap3'
-BOOTSTRAP_THEME='paper'
+BOOTSTRAP_THEME='readable'
+PYGMENTS_STYLE='emacs'
 
 AUTHOR = u'Will Barnes'
 SITENAME = u'Will Barnes'
@@ -19,7 +20,7 @@ DISPLAY_CATEGORIES_ON_MENU=False
 
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
-CATEGORY_FEED_ATOM = None 
+CATEGORY_FEED_ATOM = None
 TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
@@ -29,11 +30,11 @@ STATIC=['images','notebooks']
 ARTICLE_EXCLUDES=['notebooks']
 
 #markup options
-MARKUP=('md',)#'ipynb')
+MARKUP=('md','ipynb')
 
 #plugins
 PLUGIN_PATHS=['pelican-plugins','plugins']
-PLUGINS=['liquid_tags.notebook','ipynb.liquid',]#'ipynb.markdown'] 
+PLUGINS=['liquid_tags.notebook','ipynb.liquid',]#'ipynb.markdown']
 
 # Blogroll
 #LINKS = (('Pelican', 'http://getpelican.com/'),
@@ -44,12 +45,13 @@ PLUGINS=['liquid_tags.notebook','ipynb.liquid',]#'ipynb.markdown']
 # Social widget
 SOCIAL = (('twitter', 'https://twitter.com/wtbarnes_'),
           ('github', 'https://github.com/wtbarnes'),
-          ('stackoverflow', 'http://stackoverflow.com/users/4717663/will-barnes',                   'stack-overflow'))
-          
+          ('stackoverflow', 'http://stackoverflow.com/users/4717663/will-barnes', 'stack-overflow'))
+
 # Github
 GITHUB_USER='wtbarnes'
 GITHUB_REPO_COUNT=3
 GITHUB_SKIP_FORK=True
+#GITHUB_SHOW_USER_LINK=False
 
 DEFAULT_PAGINATION = 10
 

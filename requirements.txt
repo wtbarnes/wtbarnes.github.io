@@ -1,6 +1,7 @@
 appnope==0.1.0
 backports-abc==0.4
 backports.ssl-match-hostname==3.4.0.2
+beautifulsoup4==4.4.1
 blinker==1.4
 decorator==4.0.9
 docutils==0.12
