@@ -10,12 +10,14 @@ As a graduate student in physics, I wanted to maintain a personal webpage to adv
 
 I had previously built a single-page website that was hosted on my department's archaic SuSE Enterprise Linux server. This had a few downsides. To add content meant editing the raw HTML which often discouraged me from updating my page. Additionally, once I had made the desired changes on my local copy, I had to push the changes to GitHub and then ssh into the server and pull down the changes manually.
 
-**TODO: Note on blogging+webpage**
+Pelican (and other static-site generators like [Jekyll](https://jekyllrb.com/)) solves this problem by letting you write all of your posts in Markdown and then auto-generating the HTML. I also found that [several other people had looked into writing blog posts with Jupyter notebooks](http://cyrille.rossant.net/pelican-github/) and had even [written Pelican plugins](http://danielfrg.com/blog/2013/02/16/blogging-pelican-ipython-notebook/) to make this process easier! This made Pelican a natural choice for someone already familiar with Python and who wants to write blog posts that may include a mixture of equations, code, figures, and (Markdown) text.
+
+Below I've detailed how I setup this blog using Pelican so that I can write posts in both Markdown and Jupyter notebooks and then publish the site on GitHub Pages using Travis CI. I've made sure to link to the many blogs/docs that helped me so make sure to check out all of those links as well.
 
 ## GitHub Pages
 Because we're going to host the blog on GitHub, we need to [set up a GitHub Pages repository](https://pages.github.com/). Basically this just involves creating a repository with the name `<username>.github.io` (where `<username>` is your GitHub username). Once you've created the repository, clone it and change into that directory:
 ```bash
-$ git clone https://github.com/wtbarnes/<username>.github.io.git
+$ git clone https://github.com/<username>.github.io.git
 $ cd <username>.github.io
 ```
 For a user site, GitHub will look for content on the `master` branch of the repo. Because we want to separate the files we'll be authoring and the actual content that will get served to the page, we'll create a new branch, call it `sources`, where we'll do all of our work. Create the branch and switch to it:
@@ -36,9 +38,9 @@ Because we've isolated ourselves from the rest of our Python installation, we ca
 ```bash
 $ pip install pelican markdown ghp-import
 ```
-Additionally, I found that I needed Jupyter and IPython in order to get the IPython notebooks plugin to work so let's go ahead and grab that too. beautifulsoup4 is also listed so we'll include that as well (**Note:** Jupyter comes with a lot of dependencies so this may cause you're install to be a bit bloated. Some packages can probably be safely removed though I haven't looked into this):
+Additionally, I found that I needed Jupyter and IPython in order to get the IPython notebooks plugin to work so let's go ahead and grab that too. (**Note:** Jupyter comes with a lot of dependencies so this may cause you're install to be a bit bloated. Some packages can probably be safely removed though I haven't looked into this):
 ```bash
-$ pip install jupyter ipython beautifulsoup4
+$ pip install jupyter ipython
 ```
 This should be all the dependencies we need so let's go ahead and save all of the required modules:
 ```bash
@@ -149,9 +151,37 @@ Summary: This blog post was written in a Jupyter notebook. It can be included in
 
 {% notebook notebooks/my_test_notebook.ipynb %}
 ```
-This post should now be available on your main blog roll and the content should all be rendered from your Jupyter notebook, figures, LaTeX, Markdown, and all! 
+This post should now be available on your main blog roll and the content should all be rendered from your Jupyter notebook, figures, LaTeX, Markdown, and all!
 
 ## Automatic Builds with Travis CI
+Now we want to publish our site with GitHub Pages. By default, any content on the `master` branch of your repo will be available at `<username>.github.io`. Every time we edit our content on the `sources` branch and push it to GitHub, we would like these changes to be reflected on our actual site.
+A continuous integration service like [Travis CI](https://travis-ci.org/) allows you to leverage GitHub's web hooks to trigger builds of your website at each commit to `sources`.
+
+Login to Travis CI with your GitHub username and enable your `<username>.github.io` repository. Then we need to provide a `.travis.yml` configuration file to tell Travis what to do at each commit. The `.travis.yml` for this blog looks like:
+```travis
+language: python
+python:
+- '2.7'
+sudo: required
+branches:
+  only:
+  - sources
+install:
+- pip install -r requirements.txt
+script:
+- make publish github
+env:
+  global:
+    secure: xxxxxxxxx
+```
+This tells Travis that we're using Python, version 2.7, that we only want to trigger builds when pushing to the `sources` branch, to install every package in our `requirements.txt` file, and to run the `make` with the `publish github` option. This will use `ghp-import` to put a copy of everything in `output/` on `master` and then do a force push to `master`
+
+This last line contains a key that will allow Travis to do a force push to the `master` branch. Generate using [the instructions listed here](http://blog.mathieu-leplatre.info/publish-your-pelican-blog-on-github-pages-via-travis-ci.html). Finally, in order to give Travis all the permissions it needs for the force push, replace the second line in the `github: publish` block of `Makefile` with:
+```bash
+git push -f https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG} $(GITHUB_PAGES_BRANCH)
+```
+
+That's pretty much it. Author some posts, add a theme and push to the `sources` branch and Travis and GitHub should take care of the rest. You can see any errors that get thrown by going to your Travis CI homepage. For a complete working example, [check out the source for this site on my GitHub page.](https://github.com/wtbarnes/wtbarnes.github.io/tree/sources)
 
 ## Other Great Resources
 
