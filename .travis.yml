@@ -5,8 +5,16 @@ sudo: required
 branches:
   only:
   - sources
+before_install:
+- sudo apt-get update -qq
+- sudo apt-get install -y texlive texlive-latex-extra
 install:
 - pip install -r requirements.txt
+before_script:
+- python resume/build_cv.py --md_out_file content/pages/cv.md --pdf_link {filename}/files/cv.pdf
+- pdflatex -output-directory=resume/output/ -aux-directory=resume/output/ resume/output/cv.tex
+- mkdir content/files
+- cp resume/output/cv.pdf content/files/
 script:
 - make publish github
 env:

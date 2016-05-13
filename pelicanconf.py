@@ -27,6 +27,7 @@ AUTHOR_FEED_RSS = None
 
 #path config
 STATIC=['images','notebooks']
+STATIC_PATHS=['images','notebooks','files']
 ARTICLE_EXCLUDES=['notebooks']
 
 #markup options
@@ -47,10 +48,14 @@ SOCIAL = (('twitter', 'https://twitter.com/wtbarnes_'),
           ('github', 'https://github.com/wtbarnes'),
           ('stackoverflow', 'http://stackoverflow.com/users/4717663/will-barnes', 'stack-overflow'))
 
+# About Me blurb
+AVATAR='/images/about_me.png'
+ABOUT_ME='PhD student at Rice University studying plasma processes in million-degree solar coronal loops.'
+
 # Github
 GITHUB_USER='wtbarnes'
 GITHUB_REPO_COUNT=3
-GITHUB_SKIP_FORK=True
+GITHUB_SKIP_FORK=False
 #GITHUB_SHOW_USER_LINK=False
 
 DEFAULT_PAGINATION = 10
