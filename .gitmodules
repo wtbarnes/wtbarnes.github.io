@@ -10,3 +10,6 @@
 [submodule "content/notebooks/moleskine"]
 	path = content/notebooks/moleskine
 	url = https://github.com/wtbarnes/moleskine.git
+[submodule "resume"]
+	path = resume
+	url = https://github.com/wtbarnes/resume.git
