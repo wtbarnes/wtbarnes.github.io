@@ -6,10 +6,11 @@ branches:
   only:
   - sources
 before_install:
-- sudo apt-get update -qq
-- sudo apt-get install -y texlive texlive-latex-extra
-- tlmgr install moderncv
+- mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive
 install:
+- PATH=$HOME/texlive/bin/x86_64-linux:$PATH
+- tlmgr update --self
+- tlmgr install moderncv
 - pip install -r requirements.txt
 before_script:
 - python resume/build_cv.py --md_out_file content/pages/cv.md --pdf_link {filename}/files/cv.pdf
