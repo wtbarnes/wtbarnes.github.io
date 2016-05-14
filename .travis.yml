@@ -5,20 +5,10 @@ sudo: required
 branches:
   only:
   - sources
-#before_install:
-#- mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive
 install:
-#- PATH=$HOME/texlive/bin/x86_64-linux:$PATH
-#- tlmgr update --self
-#- tlmgr install moderncv
 - pip install -r requirements.txt
-#before_script:
-#- python resume/build_cv.py --md_out_file content/pages/cv.md --pdf_link {filename}/files/cv.pdf
-#- pdflatex -output-directory=resume/output/ -aux-directory=resume/output/ resume/output/cv.tex
-#- mkdir content/files
-#- cp resume/output/cv.pdf content/files/
 script:
 - make publish github
 env:
   global:
-    secure: do5HXnLD3tY2p1aOOC2jy8r39nucfZTV9nP2yruXn70kOnIW6e6hfufxeSmnD+W1FOe04GyFhx8WbxcPfLs3rj2Qg/1UWspQ4ND2AeMw4WydMzMX4BE5EjGwiADrbmDAP0BPp/lheZF4JSmVqhzauCxpxzGvl7XsnylHmjrL+TGGQ132UACMNtUmzs4dDC9ZmS1Lb2KHd/u4N5Q4+v2GngSIy4jIRozNQf/n3GBKTguKB09nPAomaJkJEveZhpriqHwP0NnJP4RtyJRvaR4AB+bxpsJH4FTjCtfn66hy1mrr34Uy91p4d+G8h9qrxknOT7DGXbiAg6fWwcBVuPGC5m94W39bx2J3wE6YYG6BNNdK6x6IBG9LmPShvXtCOhxRk//uqhUhsqw4qlFBI744+5YPViYCPLDvXQ8RV4UPPMDnrfI9ZAFHtGLIF/F7DWuQwkbF8aEFGCOYnjscMFq4bxW9zv1ANvPv7/EvrgIzc+u23FmpartNI99uyNxlmeQcl7lg+siRaQn4ZEpsEm/xj7BT7LjTNh5sibXk5QPwVq+Da/b/GWDzRAIQt+WQbzeD/WLGNrCBrmHkw0MGwdKYAalqPN923/262vcyQQnZLQmeKD0XN2JtaWNfoJfS6igbtnKeb918T8bD4HD81AHz9PpJfUs29Vknd6fhnm7ZdEQ=
+    secure: KmnXiLkhrNr2sgGS08/A1r6WFXjihfNgkdQB2ZJJDXbVDgn3hxt46w8Kqbv90oqYjZREJZA1TQxzxwkx1IecalVq1szKA0j40bWy4F9FBTL82js1h5rX6T0DV1jIHJ6pFCsFpfiawLjxgwyEn7oBkCrzhA0FUdJi0Zmlsh+3WnFK5KM1qfWKs+AJ9B5Ya+I+XzZXm2gwun3vQmpMiHRTn6MYyzz2Ah1RpXdbzg8jNDHtiuZg1dVUuKfr0rwPV6MJORr0VyXaUXwhR2U8ewKurH/6v9td8LL32FxnYYyiWBgP+qdWkiQJ4VQaNNTAqaU3pk3z7scpJ1cyag5P4Ufrzh6c8KbkHGeuLb9qpyJytD2Fef5bMI5UfkoAods3tmwcT8DvNLI+1I0EhyENRm3aH1V2wnqyBSIjnNLZfx6xPIS5XEUyKdr+YlSuJIQOehgU3AByAV3YllURh4OvGYmx+XwXC0ud7pArWcf3zKKniZI4+6zY0ABkzgGurtC4iGi4zXMkrg7NleeR+lMQFPCNDFgeq4C5kVBfThgOys08VdE4kwrQ3laI6KqW9qM8LUP8WOcwmUYr/kPu1OsWGpiU95b/2S4sH1BEyF0mXGXzUTPUXlnQc5+fS2XejB6nwHF/KG3uqVe9BFPJf5g/08L2z6OL2TsPugpkFdbHb+Lw9UA=
