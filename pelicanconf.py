@@ -26,8 +26,9 @@ AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
 #path config
-STATIC=['images']
-STATIC_PATHS=['images']
+STATIC=['images','notebooks']
+STATIC_PATHS=['images','notebooks']
+ARTICLE_EXCLUDES=['notebooks']
 
 #markup options
 MARKUP=('md','ipynb')
