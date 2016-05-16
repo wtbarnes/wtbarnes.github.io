@@ -33,8 +33,8 @@ STATIC_PATHS=['images']
 MARKUP=('md','ipynb')
 
 #plugins
-PLUGIN_PATHS=['pelican-plugins']#,'plugins']
-PLUGINS=['liquid_tags.notebook']#,'ipynb.liquid',]#'ipynb.markdown']
+PLUGIN_PATHS=['pelican-plugins','plugins']
+PLUGINS=['liquid_tags.notebook','ipynb.liquid',]#'ipynb.markdown']
 
 # Blogroll
 #LINKS = (('Pelican', 'http://getpelican.com/'),
