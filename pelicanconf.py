@@ -34,7 +34,7 @@ MARKUP=('md','ipynb')
 
 #plugins
 PLUGIN_PATHS=['pelican-plugins','plugins']
-PLUGINS=['liquid_tags.notebook','ipynb.liquid',]#'ipynb.markdown']
+PLUGINS=['liquid_tags.notebook','pelican-ipynb.liquid',]#'pelican-ipynb.markdown']
 
 # Blogroll
 #LINKS = (('Pelican', 'http://getpelican.com/'),
