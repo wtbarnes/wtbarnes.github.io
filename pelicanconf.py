@@ -25,6 +25,10 @@ TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
+#path config
+STATIC=['images']
+STATIC_PATHS=['images']
+
 # Blogroll
 #LINKS = (('Pelican', 'http://getpelican.com/'),
 #         ('Python.org', 'http://python.org/'),
@@ -35,6 +39,13 @@ AUTHOR_FEED_RSS = None
 SOCIAL = (('twitter', 'https://twitter.com/wtbarnes_'),
           ('github', 'https://github.com/wtbarnes'),
           ('stackoverflow', 'http://stackoverflow.com/users/4717663/will-barnes', 'stack-overflow'))
+
+# About Me blurb
+AVATAR='/images/about_me.png'
+ABOUT_ME='PhD student at Rice University studying plasma processes in million-degree solar coronal loops.'
+
+#banner
+BANNER='images/sdo_aia_171_loops_banner.png'
 
 # Github
 GITHUB_USER='wtbarnes'
