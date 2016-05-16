@@ -6,4 +6,4 @@ slug:hello-jupyter
 Authors: Will Barnes
 Summary: This blog post was written in a Jupyter notebook. It can be included in a post using a liquid tag.
 
-{% notebook notebooks/moleskine/blogs/hello_jupyter_pelican.ipynb %}
+{% notebook notebooks/hello_jupyter_pelican.ipynb %}
