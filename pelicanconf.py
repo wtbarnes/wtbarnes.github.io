@@ -29,6 +29,13 @@ AUTHOR_FEED_RSS = None
 STATIC=['images']
 STATIC_PATHS=['images']
 
+#markup options
+MARKUP=('md','ipynb')
+
+#plugins
+PLUGIN_PATHS=['pelican-plugins']#,'plugins']
+PLUGINS=['liquid_tags.notebook']#,'ipynb.liquid',]#'ipynb.markdown']
+
 # Blogroll
 #LINKS = (('Pelican', 'http://getpelican.com/'),
 #         ('Python.org', 'http://python.org/'),
