@@ -26,7 +26,7 @@ AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
 #path config
-STATIC_PATHS=['images','notebooks']
+STATIC_PATHS=['images','notebooks','files']
 ARTICLE_EXCLUDES=['notebooks']
 
 #markup options
