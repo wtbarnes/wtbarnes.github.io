@@ -7,3 +7,6 @@
 [submodule "plugins/pelican-ipynb"]
 	path = plugins/pelican-ipynb
 	url = https://github.com/danielfrg/pelican-ipynb.git
+[submodule "resume"]
+	path = resume
+	url = https://github.com/wtbarnes/resume.git
