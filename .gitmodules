@@ -10,3 +10,6 @@
 [submodule "resume"]
 	path = resume
 	url = https://github.com/wtbarnes/resume.git
+[submodule "themes/pelican-themes"]
+	path = themes/pelican-themes
+	url = https://github.com/getpelican/pelican-themes.git
