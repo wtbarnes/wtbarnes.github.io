@@ -6,6 +6,8 @@ slug:blogging-howto
 Authors: Will Barnes
 Summary: A thorough walkthrough of how I setup this blog using Pelican so that I can write posts using Jupyter notebooks and publish it with GitHub Pages and Travis CI.
 
+__EDIT:__ Updated push commands in Makefile to fix `GH_TOKEN` security flaw.
+
 As a graduate student in physics, I wanted to maintain a personal webpage to advertise my current research projects to other researchers in my field and for the purpose of shamelessly self-promoting the few skills I've gained in graduate school in case I might one day want a real job.
 
 I had previously built a single-page website that was hosted on my department's archaic SuSE Enterprise Linux server. This had a few downsides. To add content meant editing the raw HTML which often discouraged me from updating my page. Additionally, once I had made the desired changes on my local copy, I had to push the changes to GitHub and then ssh into the server and pull down the changes manually.
@@ -178,8 +180,9 @@ This tells Travis that we're using Python, version 2.7, that we only want to tri
 
 This last line contains a key that will allow Travis to do a force push to the `master` branch. Generate using [the instructions listed here](http://blog.mathieu-leplatre.info/publish-your-pelican-blog-on-github-pages-via-travis-ci.html). Finally, in order to give Travis all the permissions it needs for the force push, replace the second line in the `github: publish` block of `Makefile` with:
 ```bash
-git push -f https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG} $(GITHUB_PAGES_BRANCH)
+@git push -fq https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG} $(GITHUB_PAGES_BRANCH)
 ```
+The `@` symbol in front of this line in the Makefile and the `-q` flag suppress all output related to this step in the build. Not doing so will result in your `GH_TOKEN`, which we've gone to the trouble of encrypting, being published to your public Travis build logs.
 
 That's pretty much it. Author some posts, add a theme and push to the `sources` branch and Travis and GitHub should take care of the rest. You can see any errors that get thrown by going to your Travis CI homepage. For a complete working example, [check out the source for this site on my GitHub page.](https://github.com/wtbarnes/wtbarnes.github.io/tree/sources)
 
