@@ -87,7 +87,7 @@ The biggest advantage of this method is that we now have a complete separation b
 Note that markdown and TeX are just a few examples of the formats we could use. If you wanted a great deal more control over the style of your resume, you might consider doing the layout in HTML, the styling in CSS, and converting to PDF with pandoc (if needed).
 
 ## Bonus: Updates with Travis CI
-As I mentioned earlier, I wanted to have a more extended PDF version of my CV and also include a shorter [markdown]({filename}/cv.md) version on this webpage. Given the YAML/templating approach that I use, why not let Travis CI generate the markdown, TeX, and PDF files on the fly?
+As I mentioned earlier, I wanted to have a more extended PDF version of my CV and also include a shorter [markdown version]({filename}/pages/cv.md) on this webpage. Given the YAML/templating approach that I use, why not let Travis CI generate the markdown, TeX, and PDF files on the fly?
 
 To do this, I added my [resume repo](https://github.com/wtbarnes/resume) as a submodule for this site. I then added the following lines to my `.travis.yml` file,
 ```YAML
@@ -105,7 +105,7 @@ The TeXLive blob is kindly provided by user [urdh in this repo](https://github.c
 ```Python
 STATIC_PATHS=['images','notebooks','files']
 ```
-[Linking](http://docs.getpelican.com/en/3.6.3/content.html#linking-to-internal-content) to your PDF from some page on your site is now simple. See [my example]({filename}/cv.md).
+[Linking](http://docs.getpelican.com/en/3.6.3/content.html#linking-to-internal-content) to your PDF from some page on your site is now simple. See [my example]({filename}/pages/cv.md).
 
 You can of course find the full source for [this webpage](https://github.com/wtbarnes/wtbarnes.github.io/tree/sources) and my [resume](https://github.com/wtbarnes/resume) on GitHub.
 
