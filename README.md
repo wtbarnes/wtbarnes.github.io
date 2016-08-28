@@ -9,3 +9,5 @@ My personal webpage
 * Building docs for scientific code with `cldocs`
 * ChiantiPy (with notebook!)
 * GSoC project
+* astro_paper_template project and reproducible workflows, et al.
+* pfss in the Jupyter notebook

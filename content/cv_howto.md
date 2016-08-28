@@ -1,0 +1,118 @@
+Title: Building a CV in LaTeX and Markdown with Jinja2
+Date: 2016-08-28 18:04
+Category: CV
+Tags: resume, cv, jinja2, latex, markdown
+slug:cv-howto
+Authors: Will Barnes
+Summary: For graduate students, having a current CV is important. Maintaining web- and print-friendly versions is a hassle. Jinja2 makes this easier.
+
+For a while now, I've built my CV in LaTeX using the [moderncv class](https://www.ctan.org/tex-archive/macros/latex/contrib/moderncv/?lang=en) and been reasonably happy with the product. When it came time to build this webpage, I wanted to be able to display my CV with HTML/Markdown (i.e. not just link to a PDF copy) and also concurrently maintain a PDF copy using the same `moderncv` format as my old static PDF copy.  I wanted to avoid having to maintain two separate versions (one Markdown and one LaTeX) given that I have enough trouble keeping one copy up to date.
+
+I am of course far from the first to encounter this problem. [Many](https://mszep.github.io/pandoc_resume/), [many](http://blm.io/blog/markdown-academic-cv/), [many](https://www.chainsawonatireswing.com/2013/05/28/how-i-create-manage-my-cv-using-markdown-pandoc//?from=@) others have come up with solutions to this dilemma, most of them relying on styling with CSS/HTML combined with the powerful document converter [pandoc](http://pandoc.org/). What I wanted was a bit simpler: some Markdown text to inject into a page on this site as well as a moderncv-styled TeX file from which I could build a PDF.
+
+## YAML Configuration files
+I already had my TeX file so my first thought was just to parse this and build the Markdown version from that. [Unfortunately, there aren't that many tools for parsing TeX files in Python.](http://plastex.sourceforge.net/plastex/sect0025.html) Rather than trying to pull the information from the TeX file, I decided it would be better to have the data structured from the beginning. After that, it is just a matter of reshaping the data into the desired format.
+
+The [YAML](http://yaml.org/) standard is often used for writing configuration files (a la [Travis CI](https://travis-ci.org/) and [Read the Docs](https://readthedocs.org/)), but most importantly it is [easily parsed with Python via the PyYAML package](http://pyyaml.org/wiki/PyYAMLDocumentation) straight into a Python dictionary. For example, the following YAML snippet shows the section detailing my computing skills,
+```yaml
+sections:
+  - title: Computing Skills
+    cvitems:
+    - name: Languages
+      value: C/C++, IDL, Mathematica, MATLAB, Python
+    - name: Software Tools
+      value: git/GitHub, LaTeX, SLURM, TORQUE
+    - name: Operating Systems
+      value: Linux, Mac OS X
+```
+Then, to read this in with Python, assuming this is stored in the file `cv_data.yml`,
+```Python
+>>> import yaml
+>>> with open('cv_data.yml','r') as f:
+        cv_data = yaml.load(f)
+>>> cv_data['sections']
+{'cvitems': [{'name': 'Languages',
+'value': 'C/C++, IDL, Mathematica, MATLAB, Python'},
+{'name': 'Software Tools', 'value': 'git/GitHub, LaTeX, SLURM, TORQUE'},
+{'name': 'Operating Systems', 'value': 'Linux, Mac OS X'}],
+'title': 'Computing Skills'}
+```
+The `title` field gives the name of the section; `cvitems` is the designation for the kind of `moderncv` list to be used in the TeX file generation stage. Now that we have all of the data we need in a structured format, how do we build the documents that we want?
+
+## Jinja2 Templates
+[Jinja2](http://jinja.pocoo.org/docs/dev/) is a Python-based template engine, perhaps most known for its use in the micro web application framework [Flask](http://flask.pocoo.org/docs/0.10/). [Pelican](http://blog.getpelican.com/), the blogging engine used to build this site, is also built on top of Jinja2. Unsurprisingly, Jinja2 is used primarily as an HTML templating language. However, it is really general enough to be used as a template for _any_ document, including TeX and Markdown.
+
+The basic idea behind Jinja2 templates is simple. First, write a template for the document you want to generate. As an example, let's write a Markdown template, `jinja_md_template.md`, for the section that we loaded from the YAML file ([see the docs for more info](http://jinja.pocoo.org/docs/dev/)):
+```Markdown
+## {{ section.title }}
+{% for item in section.cvitems %}
+* __{{ item.name }}:__ {{ item.value }}
+{% endfor %}
+```
+
+Next, we need to register this template with Jinja and pass in the dictionary with the relevant info:
+```Python
+>>> from jinja2 import Environment
+>>> with open('jinja_md_template.md','r') as f:
+      md_template = f.read()
+>>> md_environment = Environment().from_string(md_template)
+>>> print(md_environment.render(section=cv_data['sections']))
+```
+```Markdown
+## Computing Skills
+
+* __Languages:__ C/C++, IDL, Mathematica, MATLAB, Python
+* __Software Tools:__ git/GitHub, LaTeX, SLURM, TORQUE
+* __Operating Systems:__ Linux, Mac OS X
+```
+
+Doing this with Markdown is very straightforward. Producing the TeX file in a similar fashion is a bit more tricky. The main reason for this is that the typical Jinja2 delimiters `{}` conflict with the oft-used curly braces in LaTeX.
+
+The solution to this problem is detailed in this [Flask Snippet](http://flask.pocoo.org/snippets/55/) and it simply boils down to creating a new TeX Jinja2 environment and replacing the typical `{}` delimiters with `((()))`. The equivalent computing section from above looks like,
+```LaTeX
+\section{((( section.title )))}
+((= Simple lists with two entries =))
+((* for item in section.cvitems *))
+\cvitem{((( item.name|escape_tex )))}{((( item.value|escape_tex )))}
+((* endfor *))
+```
+
+Note that the parts of the data structure are passed through a [filter](http://jinja.pocoo.org/docs/dev/templates/#filters) `escape_tex` which escapes any TeX characters (e.g. `~,\`) appropriately. You can see my complete TeX Jinja2 template [here](https://github.com/wtbarnes/resume/blob/master/templates/cv_template.tex).
+
+## Putting it Together
+Now that we have our TeX and markdown templates, it is just a matter of passing the CV information data structure to the templates and printing it as a file. As one possible example, [see my solution](https://github.com/wtbarnes/resume/blob/master/build_cv.py) that prints both a markdown and TeX version and implements the appropriate filters for both. You will of course want to adjust it for your own needs.
+
+The biggest advantage of this method is that we now have a complete separation between the _content_ of our CV (in the YAML) and the _layout_ (as contained in the Jinja2 templates). This is a powerful approach because we can now have multiple versions of our CV, all with different layouts, and yet only update the content once. For example, say I wanted to maintain both an extended academic-style CV, but I also needed a more single-page resume for an industry job I'm applying to. This is now just a task of writing two templates instead of maintaining two separate documents.
+
+Note that markdown and TeX are just a few examples of the formats we could use. If you wanted a great deal more control over the style of your resume, you might consider doing the layout in HTML, the styling in CSS, and converting to PDF with pandoc (if needed).
+
+## Bonus: Updates with Travis CI
+As I mentioned earlier, I wanted to have a more extended PDF version of my CV and also include a shorter [markdown]({filename}/cv.md) version on this webpage. Given the YAML/templating approach that I use, why not let Travis CI generate the markdown, TeX, and PDF files on the fly?
+
+To do this, I added my [resume repo](https://github.com/wtbarnes/resume) as a submodule for this site. I then added the following lines to my `.travis.yml` file,
+```YAML
+before_install:
+- mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive
+install:
+- PATH=$HOME/texlive/bin/x86_64-linux:$PATH
+before_script:
+- python resume/build_cv.py --md_out_file content/pages/cv.md --pdf_link {filename}/files/cv.pdf
+- pdflatex -output-directory=resume/output/ -aux-directory=resume/output/ resume/output/cv.tex
+- mkdir content/files
+- cp resume/output/cv.pdf content/files/
+```
+The TeXLive blob is kindly provided by user [urdh in this repo](https://github.com/urdh/texlive-blob). You can also install TeX via `apt-get`, but there are [known issues](http://tex.stackexchange.com/questions/134365/installation-of-texlive-full-on-ubuntu-12-04) as far as getting the latest version and the needed packages. You'll also need to add the `files` directory (or wherever you want to put your PDF) to `STATIC_PATHS` in your `pelicanconf.py` file,
+```Python
+STATIC_PATHS=['images','notebooks','files']
+```
+[Linking](http://docs.getpelican.com/en/3.6.3/content.html#linking-to-internal-content) to your PDF from some page on your site is now simple. See [my example]({filename}/cv.md).
+
+You can of course find the full source for [this webpage](https://github.com/wtbarnes/wtbarnes.github.io/tree/sources) and my [resume](https://github.com/wtbarnes/resume) on GitHub.
+
+## Resources
+Here are some great resources for building a CV in many different formats. I found many of these quite helpful while coming up with my own solution and writing this post.
+
+* [Json Resume-Generate pretty HTML, LaTeX, markdown versions from a single JSON format](http://www.prat0318.com/json_resume/)
+* [Pandoc Resume](https://mszep.github.io/pandoc_resume/)
+* [Writing an Academic CV in Markdown](http://blm.io/blog/markdown-academic-cv/)
+* [Managing a CV with Markdown and pandoc](https://www.chainsawonatireswing.com/2013/05/28/how-i-create-manage-my-cv-using-markdown-pandoc//?from=@)
