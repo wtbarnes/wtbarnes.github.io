@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Building a CV in LaTeX and Markdown with Jinja2 - Will Barnes</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+
+<style type="text/css">
+
+/*some stuff for output/input prompts*/
+div.cell{border:1px solid transparent;display:-webkit-box;-webkit-box-orient:vertical;-webkit-box-align:stretch;display:-moz-box;-moz-box-orient:vertical;-moz-box-align:stretch;display:box;box-orient:vertical;box-align:stretch;display:flex;flex-direction:column;align-items:stretch}div.cell.selected{border-radius:4px;border:thin #ababab solid}
+div.cell.edit_mode{border-radius:4px;border:thin #008000 solid}
+div.cell{width:100%;padding:5px 5px 5px 0;margin:0;outline:none}
+div.prompt{min-width:11ex;padding:.4em;margin:0;font-family:monospace;text-align:right;line-height:1.21429em}
+@media (max-width:480px){div.prompt{text-align:left}}div.inner_cell{display:-webkit-box;-webkit-box-orient:vertical;-webkit-box-align:stretch;display:-moz-box;-moz-box-orient:vertical;-moz-box-align:stretch;display:box;box-orient:vertical;box-align:stretch;display:flex;flex-direction:column;align-items:stretch;-webkit-box-flex:1;-moz-box-flex:1;box-flex:1;flex:1}
+div.input_area{border:1px solid #cfcfcf;border-radius:4px;background:#f7f7f7;line-height:1.21429em}
+div.prompt:empty{padding-top:0;padding-bottom:0}
+div.input{page-break-inside:avoid;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-align:stretch;display:-moz-box;-moz-box-orient:horizontal;-moz-box-align:stretch;display:box;box-orient:horizontal;box-align:stretch;}
+div.inner_cell{width:90%;}
+div.input_area{border:1px solid #cfcfcf;border-radius:4px;background:#f7f7f7;}
+div.input_prompt{color:navy;border-top:1px solid transparent;}
+div.output_wrapper{margin-top:5px;position:relative;display:-webkit-box;-webkit-box-orient:vertical;-webkit-box-align:stretch;display:-moz-box;-moz-box-orient:vertical;-moz-box-align:stretch;display:box;box-orient:vertical;box-align:stretch;width:100%;}
+div.output_scroll{height:24em;width:100%;overflow:auto;border-radius:4px;-webkit-box-shadow:inset 0 2px 8px rgba(0, 0, 0, 0.8);-moz-box-shadow:inset 0 2px 8px rgba(0, 0, 0, 0.8);box-shadow:inset 0 2px 8px rgba(0, 0, 0, 0.8);}
+div.output_collapsed{margin:0px;padding:0px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-box-align:stretch;display:-moz-box;-moz-box-orient:vertical;-moz-box-align:stretch;display:box;box-orient:vertical;box-align:stretch;width:100%;}
+div.out_prompt_overlay{height:100%;padding:0px 0.4em;position:absolute;border-radius:4px;}
+div.out_prompt_overlay:hover{-webkit-box-shadow:inset 0 0 1px #000000;-moz-box-shadow:inset 0 0 1px #000000;box-shadow:inset 0 0 1px #000000;background:rgba(240, 240, 240, 0.5);}
+div.output_prompt{color:darkred;}
+
+a.anchor-link:link{text-decoration:none;padding:0px 20px;visibility:hidden;}
+h1:hover .anchor-link,h2:hover .anchor-link,h3:hover .anchor-link,h4:hover .anchor-link,h5:hover .anchor-link,h6:hover .anchor-link{visibility:visible;}
+/* end stuff for output/input prompts*/
+
+
+.highlight-ipynb .hll { background-color: #ffffcc }
+.highlight-ipynb  { background: #f8f8f8; }
+.highlight-ipynb .c { color: #408080; font-style: italic } /* Comment */
+.highlight-ipynb .err { border: 1px solid #FF0000 } /* Error */
+.highlight-ipynb .k { color: #008000; font-weight: bold } /* Keyword */
+.highlight-ipynb .o { color: #666666 } /* Operator */
+.highlight-ipynb .cm { color: #408080; font-style: italic } /* Comment.Multiline */
+.highlight-ipynb .cp { color: #BC7A00 } /* Comment.Preproc */
+.highlight-ipynb .c1 { color: #408080; font-style: italic } /* Comment.Single */
+.highlight-ipynb .cs { color: #408080; font-style: italic } /* Comment.Special */
+.highlight-ipynb .gd { color: #A00000 } /* Generic.Deleted */
+.highlight-ipynb .ge { font-style: italic } /* Generic.Emph */
+.highlight-ipynb .gr { color: #FF0000 } /* Generic.Error */
+.highlight-ipynb .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.highlight-ipynb .gi { color: #00A000 } /* Generic.Inserted */
+.highlight-ipynb .go { color: #888888 } /* Generic.Output */
+.highlight-ipynb .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.highlight-ipynb .gs { font-weight: bold } /* Generic.Strong */
+.highlight-ipynb .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.highlight-ipynb .gt { color: #0044DD } /* Generic.Traceback */
+.highlight-ipynb .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.highlight-ipynb .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.highlight-ipynb .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.highlight-ipynb .kp { color: #008000 } /* Keyword.Pseudo */
+.highlight-ipynb .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.highlight-ipynb .kt { color: #B00040 } /* Keyword.Type */
+.highlight-ipynb .m { color: #666666 } /* Literal.Number */
+.highlight-ipynb .s { color: #BA2121 } /* Literal.String */
+.highlight-ipynb .na { color: #7D9029 } /* Name.Attribute */
+.highlight-ipynb .nb { color: #008000 } /* Name.Builtin */
+.highlight-ipynb .nc { color: #0000FF; font-weight: bold } /* Name.Class */
+.highlight-ipynb .no { color: #880000 } /* Name.Constant */
+.highlight-ipynb .nd { color: #AA22FF } /* Name.Decorator */
+.highlight-ipynb .ni { color: #999999; font-weight: bold } /* Name.Entity */
+.highlight-ipynb .ne { color: #D2413A; font-weight: bold } /* Name.Exception */
+.highlight-ipynb .nf { color: #0000FF } /* Name.Function */
+.highlight-ipynb .nl { color: #A0A000 } /* Name.Label */
+.highlight-ipynb .nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+.highlight-ipynb .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.highlight-ipynb .nv { color: #19177C } /* Name.Variable */
+.highlight-ipynb .ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+.highlight-ipynb .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight-ipynb .mf { color: #666666 } /* Literal.Number.Float */
+.highlight-ipynb .mh { color: #666666 } /* Literal.Number.Hex */
+.highlight-ipynb .mi { color: #666666 } /* Literal.Number.Integer */
+.highlight-ipynb .mo { color: #666666 } /* Literal.Number.Oct */
+.highlight-ipynb .sb { color: #BA2121 } /* Literal.String.Backtick */
+.highlight-ipynb .sc { color: #BA2121 } /* Literal.String.Char */
+.highlight-ipynb .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.highlight-ipynb .s2 { color: #BA2121 } /* Literal.String.Double */
+.highlight-ipynb .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
+.highlight-ipynb .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.highlight-ipynb .si { color: #BB6688; font-weight: bold } /* Literal.String.Interpol */
+.highlight-ipynb .sx { color: #008000 } /* Literal.String.Other */
+.highlight-ipynb .sr { color: #BB6688 } /* Literal.String.Regex */
+.highlight-ipynb .s1 { color: #BA2121 } /* Literal.String.Single */
+.highlight-ipynb .ss { color: #19177C } /* Literal.String.Symbol */
+.highlight-ipynb .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.highlight-ipynb .vc { color: #19177C } /* Name.Variable.Class */
+.highlight-ipynb .vg { color: #19177C } /* Name.Variable.Global */
+.highlight-ipynb .vi { color: #19177C } /* Name.Variable.Instance */
+.highlight-ipynb .il { color: #666666 } /* Literal.Number.Integer.Long */
+</style>
+
+<style type="text/css">
+/* Overrides of notebook CSS for static HTML export */
+div.entry-content {
+  overflow: visible;
+  padding: 8px;
+}
+.input_area {
+  padding: 0.2em;
+}
+
+a.heading-anchor {
+ white-space: normal;
+}
+
+.rendered_html
+code {
+ font-size: .8em;
+}
+
+pre.ipynb {
+  color: black;
+  background: #f7f7f7;
+  border: none;
+  box-shadow: none;
+  margin-bottom: 0;
+  padding: 0;
+  margin: 0px;
+  font-size: 13px;
+}
+
+/* remove the prompt div from text cells */
+div.text_cell .prompt {
+    display: none;
+}
+
+/* remove horizontal padding from text cells, */
+/* so it aligns with outer body text */
+div.text_cell_render {
+    padding: 0.5em 0em;
+}
+
+img.anim_icon{padding:0; border:0; vertical-align:middle; -webkit-box-shadow:none; -box-shadow:none}
+</style>
+
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+<script type="text/javascript">
+init_mathjax = function() {
+    if (window.MathJax) {
+        // MathJax loaded
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                displayMath: [ ['$$','$$'], ["\\[","\\]"] ]
+            },
+            displayAlign: 'left', // Change this to 'center' to center equations.
+            "HTML-CSS": {
+                styles: {'.MathJax_Display': {"margin": 0}}
+            }
+        });
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+    }
+}
+init_mathjax();
+</script>
+
+<link rel="canonical" href="/cv-howto/">
+
+        <meta name="author" content="Will Barnes" />
+        <meta name="keywords" content="resume,cv,jinja2,latex,markdown" />
+        <meta name="description" content="For graduate students, having a current CV is important. Maintaining web- and print-friendly versions is a hassle. Jinja2 makes this easier." />
+
+        <meta property="og:site_name" content="Will Barnes" />
+        <meta property="og:type" content="article"/>
+        <meta property="og:title" content="Building a CV in LaTeX and Markdown with Jinja2"/>
+        <meta property="og:url" content="/cv-howto/"/>
+        <meta property="og:description" content="For graduate students, having a current CV is important. Maintaining web- and print-friendly versions is a hassle. Jinja2 makes this easier."/>
+        <meta property="article:published_time" content="2016-08-28" />
+            <meta property="article:section" content="CV" />
+            <meta property="article:tag" content="resume" />
+            <meta property="article:tag" content="cv" />
+            <meta property="article:tag" content="jinja2" />
+            <meta property="article:tag" content="latex" />
+            <meta property="article:tag" content="markdown" />
+            <meta property="article:author" content="Will Barnes" />
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="/theme/css/bootstrap.readable.min.css" type="text/css"/>
+    <link href="/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="/theme/css/pygments/emacs.css" rel="stylesheet">
+    <link rel="stylesheet" href="/theme/css/style.css" type="text/css"/>
+
+        <link href="/feeds/all.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Will Barnes ATOM Feed"/>
+
+
+
+        <link href="/feeds/cv.atom.xml" type="application/atom+xml" rel="alternate"
+              title="Will Barnes CV ATOM Feed"/>
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">
+Will Barnes            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                         <li><a href="/contact/">
+                             Contact
+                          </a></li>
+                         <li><a href="/cv/">
+                             CV
+                          </a></li>
+                         <li><a href="/research/">
+                             Research
+                          </a></li>
+                         <li><a href="/software/">
+                             Software
+                          </a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              <li><a href="/archives.html"><i class="fa fa-th-list"></i><span class="icon-label">Archives</span></a></li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <section id="content">
+        <article>
+            <header class="page-header">
+                <h1>
+                    <a href="/cv-howto/"
+                       rel="bookmark"
+                       title="Permalink to Building a CV in LaTeX and Markdown with Jinja2">
+                        Building a CV in LaTeX and Markdown with Jinja2
+                    </a>
+                </h1>
+            </header>
+            <div class="entry-content">
+                <div class="panel">
+                    <div class="panel-body">
+<footer class="post-info">
+    <span class="label label-default">Date</span>
+    <span class="published">
+        <i class="fa fa-calendar"></i><time datetime="2016-08-28T18:04:00-05:00"> Sun 28 August 2016</time>
+    </span>
+
+
+
+
+
+<span class="label label-default">Tags</span>
+	<a href="/tag/resume.html">resume</a>
+        /
+	<a href="/tag/cv.html">cv</a>
+        /
+	<a href="/tag/jinja2.html">jinja2</a>
+        /
+	<a href="/tag/latex.html">latex</a>
+        /
+	<a href="/tag/markdown.html">markdown</a>
+    
+</footer><!-- /.post-info -->                    </div>
+                </div>
+                <p>For a while now, I've built my CV in LaTeX using the <a href="https://www.ctan.org/tex-archive/macros/latex/contrib/moderncv/?lang=en">moderncv class</a> and been reasonably happy with the product. When it came time to build this webpage, I wanted to be able to display my CV with HTML/Markdown (i.e. not just link to a PDF copy) and also concurrently maintain a PDF copy using the same <code>moderncv</code> format as my old static PDF copy.  I wanted to avoid having to maintain two separate versions (one Markdown and one LaTeX) given that I have enough trouble keeping one copy up to date.</p>
+<p>I am of course far from the first to encounter this problem. <a href="https://mszep.github.io/pandoc_resume/">Many</a>, <a href="http://blm.io/blog/markdown-academic-cv/">many</a>, <a href="https://www.chainsawonatireswing.com/2013/05/28/how-i-create-manage-my-cv-using-markdown-pandoc//?from=@">many</a> others have come up with solutions to this dilemma, most of them relying on styling with CSS/HTML combined with the powerful document converter <a href="http://pandoc.org/">pandoc</a>. What I wanted was a bit simpler: some Markdown text to inject into a page on this site as well as a moderncv-styled TeX file from which I could build a PDF.</p>
+<h2>YAML Configuration files</h2>
+<p>I already had my TeX file so my first thought was just to parse this and build the Markdown version from that. <a href="http://plastex.sourceforge.net/plastex/sect0025.html">Unfortunately, there aren't that many tools for parsing TeX files in Python.</a> Rather than trying to pull the information from the TeX file, I decided it would be better to have the data structured from the beginning. After that, it is just a matter of reshaping the data into the desired format.</p>
+<p>The <a href="http://yaml.org/">YAML</a> standard is often used for writing configuration files (a la <a href="https://travis-ci.org/">Travis CI</a> and <a href="https://readthedocs.org/">Read the Docs</a>), but most importantly it is <a href="http://pyyaml.org/wiki/PyYAMLDocumentation">easily parsed with Python via the PyYAML package</a> straight into a Python dictionary. For example, the following YAML snippet shows the section detailing my computing skills,</p>
+<div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">sections</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">title</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Computing Skills</span>
+    <span class="l l-Scalar l-Scalar-Plain">cvitems</span><span class="p p-Indicator">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Languages</span>
+      <span class="l l-Scalar l-Scalar-Plain">value</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">C/C++, IDL, Mathematica, MATLAB, Python</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Software Tools</span>
+      <span class="l l-Scalar l-Scalar-Plain">value</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">git/GitHub, LaTeX, SLURM, TORQUE</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Operating Systems</span>
+      <span class="l l-Scalar l-Scalar-Plain">value</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">Linux, Mac OS X</span>
+</pre></div>
+
+
+<p>Then, to read this in with Python, assuming this is stored in the file <code>cv_data.yml</code>,</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">yaml</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;cv_data.yml&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">cv_data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cv_data</span><span class="p">[</span><span class="s1">&#39;sections&#39;</span><span class="p">]</span>
+<span class="p">{</span><span class="s1">&#39;cvitems&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Languages&#39;</span><span class="p">,</span>
+<span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;C/C++, IDL, Mathematica, MATLAB, Python&#39;</span><span class="p">},</span>
+<span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Software Tools&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;git/GitHub, LaTeX, SLURM, TORQUE&#39;</span><span class="p">},</span>
+<span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Operating Systems&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;Linux, Mac OS X&#39;</span><span class="p">}],</span>
+<span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Computing Skills&#39;</span><span class="p">}</span>
+</pre></div>
+
+
+<p>The <code>title</code> field gives the name of the section; <code>cvitems</code> is the designation for the kind of <code>moderncv</code> list to be used in the TeX file generation stage. Now that we have all of the data we need in a structured format, how do we build the documents that we want?</p>
+<h2>Jinja2 Templates</h2>
+<p><a href="http://jinja.pocoo.org/docs/dev/">Jinja2</a> is a Python-based template engine, perhaps most known for its use in the micro web application framework <a href="http://flask.pocoo.org/docs/0.10/">Flask</a>. <a href="http://blog.getpelican.com/">Pelican</a>, the blogging engine used to build this site, is also built on top of Jinja2. Unsurprisingly, Jinja2 is used primarily as an HTML templating language. However, it is really general enough to be used as a template for <em>any</em> document, including TeX and Markdown.</p>
+<p>The basic idea behind Jinja2 templates is simple. First, write a template for the document you want to generate. As an example, let's write a Markdown template, <code>jinja_md_template.md</code>, for the section that we loaded from the YAML file (<a href="http://jinja.pocoo.org/docs/dev/">see the docs for more info</a>):</p>
+<div class="highlight"><pre><span></span><span class="x">## </span><span class="cp">{{</span> <span class="nv">section.title</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">item</span> <span class="k">in</span> <span class="nv">section.cvitems</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">* __</span><span class="cp">{{</span> <span class="nv">item.name</span> <span class="cp">}}</span><span class="x">:__ </span><span class="cp">{{</span> <span class="nv">item.value</span> <span class="cp">}}</span><span class="x"></span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p>Next, we need to register this template with Jinja and pass in the dictionary with the relevant info:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">jinja2</span> <span class="kn">import</span> <span class="n">Environment</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;jinja_md_template.md&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+      <span class="n">md_template</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">md_environment</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">()</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">md_template</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">md_environment</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="n">cv_data</span><span class="p">[</span><span class="s1">&#39;sections&#39;</span><span class="p">]))</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span>## Computing Skills
+
+* __Languages:__ C/C++, IDL, Mathematica, MATLAB, Python
+* __Software Tools:__ git/GitHub, LaTeX, SLURM, TORQUE
+* __Operating Systems:__ Linux, Mac OS X
+</pre></div>
+
+
+<p>Doing this with Markdown is very straightforward. Producing the TeX file in a similar fashion is a bit more tricky. The main reason for this is that the typical Jinja2 delimiters <code>{}</code> conflict with the oft-used curly braces in LaTeX.</p>
+<p>The solution to this problem is detailed in this <a href="http://flask.pocoo.org/snippets/55/">Flask Snippet</a> and it simply boils down to creating a new TeX Jinja2 environment and replacing the typical <code>{}</code> delimiters with <code>((()))</code>. The equivalent computing section from above looks like,</p>
+<div class="highlight"><pre><span></span><span class="k">\section</span><span class="nb">{</span>((( section.title )))<span class="nb">}</span>
+((= Simple lists with two entries =))
+((* for item in section.cvitems *))
+<span class="k">\cvitem</span><span class="nb">{</span>((( item.name|escape<span class="nb">_</span>tex )))<span class="nb">}{</span>((( item.value|escape<span class="nb">_</span>tex )))<span class="nb">}</span>
+((* endfor *))
+</pre></div>
+
+
+<p>Note that the parts of the data structure are passed through a <a href="http://jinja.pocoo.org/docs/dev/templates/#filters">filter</a> <code>escape_tex</code> which escapes any TeX characters (e.g. <code>~,\</code>) appropriately. You can see my complete TeX Jinja2 template <a href="https://github.com/wtbarnes/resume/blob/master/templates/cv_template.tex">here</a>.</p>
+<h2>Putting it Together</h2>
+<p>Now that we have our TeX and markdown templates, it is just a matter of passing the CV information data structure to the templates and printing it as a file. As one possible example, <a href="https://github.com/wtbarnes/resume/blob/master/build_cv.py">see my solution</a> that prints both a markdown and TeX version and implements the appropriate filters for both. You will of course want to adjust it for your own needs.</p>
+<p>The biggest advantage of this method is that we now have a complete separation between the <em>content</em> of our CV (in the YAML) and the <em>layout</em> (as contained in the Jinja2 templates). This is a powerful approach because we can now have multiple versions of our CV, all with different layouts, and yet only update the content once. For example, say I wanted to maintain both an extended academic-style CV, but I also needed a more single-page resume for an industry job I'm applying to. This is now just a task of writing two templates instead of maintaining two separate documents.</p>
+<p>Note that markdown and TeX are just a few examples of the formats we could use. If you wanted a great deal more control over the style of your resume, you might consider doing the layout in HTML, the styling in CSS, and converting to PDF with pandoc (if needed).</p>
+<h2>Bonus: Updates with Travis CI</h2>
+<p>As I mentioned earlier, I wanted to have a more extended PDF version of my CV and also include a shorter <a href="/cv/">markdown version</a> on this webpage. Given the YAML/templating approach that I use, why not let Travis CI generate the markdown, TeX, and PDF files on the fly?</p>
+<p>To do this, I added my <a href="https://github.com/wtbarnes/resume">resume repo</a> as a submodule for this site. I then added the following lines to my <code>.travis.yml</code> file,</p>
+<div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">before_install</span><span class="p p-Indicator">:</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">mkdir -p $HOME/texlive &amp;&amp; curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive</span>
+<span class="l l-Scalar l-Scalar-Plain">install</span><span class="p p-Indicator">:</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">PATH=$HOME/texlive/bin/x86_64-linux:$PATH</span>
+<span class="l l-Scalar l-Scalar-Plain">before_script</span><span class="p p-Indicator">:</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">python resume/build_cv.py --md_out_file content/pages/cv.md --pdf_link {filename}/files/cv.pdf</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pdflatex -output-directory=resume/output/ -aux-directory=resume/output/ resume/output/cv.tex</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">mkdir content/files</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">cp resume/output/cv.pdf content/files/</span>
+</pre></div>
+
+
+<p>The TeXLive blob is kindly provided by user <a href="https://github.com/urdh/texlive-blob">urdh in this repo</a>. You can also install TeX via <code>apt-get</code>, but there are <a href="http://tex.stackexchange.com/questions/134365/installation-of-texlive-full-on-ubuntu-12-04">known issues</a> as far as getting the latest version and the needed packages. You'll also need to add the <code>files</code> directory (or wherever you want to put your PDF) to <code>STATIC_PATHS</code> in your <code>pelicanconf.py</code> file,</p>
+<div class="highlight"><pre><span></span><span class="n">STATIC_PATHS</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;images&#39;</span><span class="p">,</span><span class="s1">&#39;notebooks&#39;</span><span class="p">,</span><span class="s1">&#39;files&#39;</span><span class="p">]</span>
+</pre></div>
+
+
+<p><a href="http://docs.getpelican.com/en/3.6.3/content.html#linking-to-internal-content">Linking</a> to your PDF from some page on your site is now simple. See <a href="/cv/">my example</a>.</p>
+<p>You can of course find the full source for <a href="https://github.com/wtbarnes/wtbarnes.github.io/tree/sources">this webpage</a> and my <a href="https://github.com/wtbarnes/resume">resume</a> on GitHub.</p>
+<h2>Resources</h2>
+<p>Here are some great resources for building a CV in many different formats. I found many of these quite helpful while coming up with my own solution and writing this post.</p>
+<ul>
+<li><a href="http://www.prat0318.com/json_resume/">Json Resume-Generate pretty HTML, LaTeX, markdown versions from a single JSON format</a></li>
+<li><a href="https://mszep.github.io/pandoc_resume/">Pandoc Resume</a></li>
+<li><a href="http://blm.io/blog/markdown-academic-cv/">Writing an Academic CV in Markdown</a></li>
+<li><a href="https://www.chainsawonatireswing.com/2013/05/28/how-i-create-manage-my-cv-using-markdown-pandoc//?from=@">Managing a CV with Markdown and pandoc</a></li>
+</ul>
+            </div>
+            <!-- /.entry-content -->
+        </article>
+    </section>
+
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+<div id="aboutme">
+        <p>
+            <img width="100%" class="img-thumbnail" src="/images/about_me.png"/>
+        </p>
+    <p>
+        <strong>About Will Barnes</strong><br/>
+        PhD student at Rice University studying plasma processes in million-degree solar coronal loops.
+    </p>
+</div>
+<section class="well well-sm">
+    <ul class="list-group list-group-flush">
+            <li class="list-group-item"><h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+              <ul class="list-group" id="social">
+                <li class="list-group-item"><a href="https://twitter.com/wtbarnes_"><i class="fa fa-twitter-square fa-lg"></i> twitter</a></li>
+                <li class="list-group-item"><a href="https://github.com/wtbarnes"><i class="fa fa-github-square fa-lg"></i> github</a></li>
+                <li class="list-group-item"><a href="http://stackoverflow.com/users/4717663/will-barnes"><i class="fa fa-stack-overflow fa-lg"></i> stackoverflow</a></li>
+              </ul>
+            </li>
+
+
+
+
+
+
+    <li class="list-group-item"><h4><i class="fa fa-github fa-lg"></i><span class="icon-label">GitHub Repos</span></h4>
+        <div id="gh_repos">
+            <p class="list-group-item">Status updating...</p>
+        </div>
+    </li>
+    </ul>
+</section>
+            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2016 Will Barnes
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="/theme/js/respond.min.js"></script>
+
+    <script src="/theme/js/bodypadding.js"></script>
+    <!-- GitHub JS -->
+    <script type="text/javascript">
+        $(document).ready(function () {
+            if (!window.jXHR) {
+                var jxhr = document.createElement('script');
+                jxhr.type = 'text/javascript';
+                jxhr.src = '/theme/js/jXHR.js';
+                var s = document.getElementsByTagName('script')[0];
+                s.parentNode.insertBefore(jxhr, s);
+            }
+
+            github.showRepos({
+                user: 'wtbarnes',
+                count: 3,
+                skip_forks: false,
+                target: '#gh_repos'
+            });
+        });
+    </script>
+    <script src="/theme/js/github.js" type="text/javascript"></script>
+    <!-- End GitHub JS Code -->
+
+</body>
+</html>

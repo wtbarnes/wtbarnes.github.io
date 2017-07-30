@@ -1,0 +1,1490 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Will Barnes</title><link href="/" rel="alternate"></link><link href="/feeds/pelican.atom.xml" rel="self"></link><id>/</id><updated>2016-03-31T01:21:00-05:00</updated><entry><title>Blogging with Pelican, Jupyter, GitHub, and Travis CI</title><link href="/blogging-howto/" rel="alternate"></link><published>2016-03-31T01:21:00-05:00</published><author><name>Will Barnes</name></author><id>tag:,2016-03-31:blogging-howto/</id><summary type="html">&lt;p&gt;&lt;strong&gt;EDIT:&lt;/strong&gt; Updated push commands in Makefile to fix &lt;code&gt;GH_TOKEN&lt;/code&gt; security flaw.&lt;/p&gt;
+&lt;p&gt;As a graduate student in physics, I wanted to maintain a personal webpage to advertise my current research projects to other researchers in my field and for the purpose of shamelessly self-promoting the few skills I've gained in graduate school in case I might one day want a real job.&lt;/p&gt;
+&lt;p&gt;I had previously built a single-page website that was hosted on my department's archaic SuSE Enterprise Linux server. This had a few downsides. To add content meant editing the raw HTML which often discouraged me from updating my page. Additionally, once I had made the desired changes on my local copy, I had to push the changes to GitHub and then ssh into the server and pull down the changes manually.&lt;/p&gt;
+&lt;p&gt;Pelican (and other static-site generators like &lt;a href="https://jekyllrb.com/"&gt;Jekyll&lt;/a&gt;) solves this problem by letting you write all of your posts in Markdown and then auto-generating the HTML. I also found that &lt;a href="http://cyrille.rossant.net/pelican-github/"&gt;several other people had looked into writing blog posts with Jupyter notebooks&lt;/a&gt; and had even &lt;a href="http://danielfrg.com/blog/2013/02/16/blogging-pelican-ipython-notebook/"&gt;written Pelican plugins&lt;/a&gt; to make this process easier! This made Pelican a natural choice for someone already familiar with Python and who wants to write blog posts that may include a mixture of equations, code, figures, and (Markdown) text.&lt;/p&gt;
+&lt;p&gt;Below I've detailed how I setup this blog using Pelican so that I can write posts in both Markdown and Jupyter notebooks and then publish the site on GitHub Pages using Travis CI. I've made sure to link to the many blogs/docs that helped me so make sure to check out all of those links as well.&lt;/p&gt;
+&lt;h2&gt;GitHub Pages&lt;/h2&gt;
+&lt;p&gt;Because we're going to host the blog on GitHub, we need to &lt;a href="https://pages.github.com/"&gt;set up a GitHub Pages repository&lt;/a&gt;. Basically this just involves creating a repository with the name &lt;code&gt;&amp;lt;username&amp;gt;.github.io&lt;/code&gt; (where &lt;code&gt;&amp;lt;username&amp;gt;&lt;/code&gt; is your GitHub username). Once you've created the repository, clone it and change into that directory:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ git clone https://github.com/&amp;lt;username&amp;gt;.github.io.git
+$ &lt;span class="nb"&gt;cd&lt;/span&gt; &amp;lt;username&amp;gt;.github.io
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;For a user site, GitHub will look for content on the &lt;code&gt;master&lt;/code&gt; branch of the repo. Because we want to separate the files we'll be authoring and the actual content that will get served to the page, we'll create a new branch, call it &lt;code&gt;sources&lt;/code&gt;, where we'll do all of our work. Create the branch and switch to it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ git branch sources
+$ git checkout sources
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Pelican&lt;/h2&gt;
+&lt;p&gt;&lt;a href="http://blog.getpelican.com/"&gt;Pelican&lt;/a&gt; is a static site-generator written in Python. Think &lt;a href="https://jekyllrb.com/"&gt;Jekyll&lt;/a&gt;, but in Python instead of Ruby. Because we'll be working in Python, we can easily leverage the power of virtual environments via &lt;code&gt;conda&lt;/code&gt;. You can also do this with &lt;code&gt;virtualenv&lt;/code&gt;; most of the setup commands are roughly the same. (&lt;strong&gt;Note:&lt;/strong&gt; If you aren't using &lt;a href="https://www.continuum.io/"&gt;Anaconda&lt;/a&gt; to manage your Python installation, you're missing out.)&lt;/p&gt;
+&lt;p&gt;Let's setup an environment for our webpage and give it an original name, and activate it,&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ conda create --name webpage &lt;span class="nv"&gt;python&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;2.7
+$ &lt;span class="nb"&gt;source&lt;/span&gt; activate webpage
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Because we've isolated ourselves from the rest of our Python installation, we can easily manage all of the dependencies we need to get our blog up and running. First, let's install Pelican, Markdown and &lt;code&gt;ghp-import&lt;/code&gt; (for force pushing content to &lt;code&gt;master&lt;/code&gt;):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ pip install pelican markdown ghp-import
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Additionally, I found that I needed Jupyter and IPython in order to get the IPython notebooks plugin to work so let's go ahead and grab that too. (&lt;strong&gt;Note:&lt;/strong&gt; Jupyter comes with a lot of dependencies so this may cause you're install to be a bit bloated. Some packages can probably be safely removed though I haven't looked into this):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ pip install jupyter ipython
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This should be all the dependencies we need so let's go ahead and save all of the required modules:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ pip freeze &amp;gt; requirements.txt
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This will make our Travis CI build much easier to configure.&lt;/p&gt;
+&lt;p&gt;It's finally time to build the site. To build the directory structure and create some of the needed files:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ pelican-quickstart
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Answer all of the questions according to how you want to setup your site. There will be a series of questions relating to how you want to publish your webpage. Answer &lt;code&gt;n&lt;/code&gt; to all (&lt;code&gt;FTP&lt;/code&gt;,&lt;code&gt;SSH&lt;/code&gt;,&lt;code&gt;Dropbox&lt;/code&gt;,&lt;code&gt;S3&lt;/code&gt;,&lt;code&gt;Rackspace Cloud Files&lt;/code&gt;) except &lt;code&gt;GitHub pages&lt;/code&gt;. This will auto-generate a Makefile option to make publishing easy. The resulting directory tree should look something like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;├── Makefile
+├── content/          #put your content here
+├── develop_server.sh
+├── fabfile.py
+├── output/           #auto-generated content will go here
+├── pelicanconf.py
+└── publishconf.py
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The &lt;code&gt;pelicanconf.py&lt;/code&gt; file defines all of the configuration for your site and has been pre-populated with the answers you supplied during the quickstart.&lt;/p&gt;
+&lt;p&gt;Pelican assumes any &lt;code&gt;.md&lt;/code&gt; file inside of &lt;code&gt;content/&lt;/code&gt; is a blog entry and will treat it as such. See &lt;a href="http://docs.getpelican.com/en/stable/content.html"&gt;here&lt;/a&gt; for more info on authoring content. Put any non-blog pages (e.g. "About", "Contact", "CV", etc.) in a subdirectory &lt;code&gt;content/pages/&lt;/code&gt;. Pelican will treat these as &lt;a href="http://docs.getpelican.com/en/stable/content.html#pages"&gt;non-chronological&lt;/a&gt; rather than just listing them in the blogroll.&lt;/p&gt;
+&lt;h2&gt;Testing Locally&lt;/h2&gt;
+&lt;p&gt;Time to make some content and see if this worked! Write a test blog post and put it in &lt;code&gt;content/&lt;/code&gt; and a test About-me page and put it in &lt;code&gt;content/pages/&lt;/code&gt;:&lt;/p&gt;
+&lt;h3&gt;&lt;code&gt;content/my_first_blog.md&lt;/code&gt;&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;Title&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Blogging&lt;/span&gt; &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;Pelican&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Jupyter&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;GitHub&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;and&lt;/span&gt; &lt;span class="n"&gt;Travis&lt;/span&gt; &lt;span class="n"&gt;CI&lt;/span&gt;
+&lt;span class="n"&gt;Date&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2016&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;04&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;02&lt;/span&gt; &lt;span class="mi"&gt;18&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;05&lt;/span&gt;
+&lt;span class="n"&gt;Category&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Pelican&lt;/span&gt;
+&lt;span class="n"&gt;Tags&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;blogging&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;test&lt;/span&gt;
+&lt;span class="n"&gt;slug&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;a_test&lt;/span&gt;
+&lt;span class="n"&gt;Authors&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Foo&lt;/span&gt; &lt;span class="n"&gt;Bar&lt;/span&gt;
+&lt;span class="n"&gt;Summary&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;A&lt;/span&gt; &lt;span class="n"&gt;test&lt;/span&gt; &lt;span class="n"&gt;blog&lt;/span&gt; &lt;span class="n"&gt;entry&lt;/span&gt;
+
+&lt;span class="n"&gt;This&lt;/span&gt; &lt;span class="k"&gt;is&lt;/span&gt; &lt;span class="n"&gt;my&lt;/span&gt; &lt;span class="n"&gt;first&lt;/span&gt; &lt;span class="n"&gt;blog&lt;/span&gt; &lt;span class="n"&gt;entry&lt;/span&gt; &lt;span class="n"&gt;and&lt;/span&gt; &lt;span class="n"&gt;it&lt;/span&gt; &lt;span class="k"&gt;is&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;test&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;&lt;code&gt;content/pages/about.md&lt;/code&gt;&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;---
+Title: About
+---
+
+This is the about me page. Here are some things about me.
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now that we've written some content, we need to generate the raw HTML. The Makefile generated by &lt;code&gt;pelican-quickstart&lt;/code&gt; gives us an option for doing this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ make html
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;If you take a look in &lt;code&gt;output/&lt;/code&gt;, you'll see all of your content there. However, for testing your site locally, it'd be nice to have these served and updated automatically. Again, the makefile provides us this option:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ make devserver
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;If you navigate to &lt;code&gt;localhost:8000&lt;/code&gt;, you should see your page. As you make changes (e.g. add posts and pages, change themes, etc.), you should see these reflected your served HTML. To stop the server:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ make stopserver
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Installing themes&lt;/h2&gt;
+&lt;p&gt;To customize the look of your webpage, Pelican provides the &lt;code&gt;THEME&lt;/code&gt; variable in &lt;code&gt;pelicanconf.py&lt;/code&gt;. &lt;a href="http://www.pelicanthemes.com/"&gt;There are many different Pelican themes&lt;/a&gt; and an official repository is maintained &lt;a href="https://github.com/getpelican/pelican-themes"&gt;here&lt;/a&gt;. This website uses the &lt;a href="https://github.com/DandyDev/pelican-bootstrap3"&gt;pelican-bootstrap3 theme&lt;/a&gt;. To install a theme, first create a directory to store them (you may want to switch between a few):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ mkdir themes/
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You can either just copy the directory containing the theme you want into here or add the theme repository as a submodule. I've opted for the latter so that I can incorporate any updates to the theme:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ &lt;span class="nb"&gt;cd&lt;/span&gt; themes/
+$ git submodule add https://github.com/&amp;lt;theme_user&amp;gt;/&amp;lt;theme_repo&amp;gt;.git
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Pelican also includes &lt;a href="http://docs.getpelican.com/en/stable/pelican-themes.html"&gt;a tool for installing and managing your themes&lt;/a&gt;. Once you have the theme installed, set the &lt;code&gt;THEME&lt;/code&gt; variable in &lt;code&gt;pelicanconf.py&lt;/code&gt; appropriately:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;THEME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;themes/&amp;lt;my_installed_theme&amp;gt;&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Writing posts with Jupyter notebooks&lt;/h2&gt;
+&lt;p&gt;To use Jupyter notebooks as posts, we'll use &lt;a href="http://docs.getpelican.com/en/stable/plugins.html"&gt;plugins&lt;/a&gt;, a way to easily extend the functionality of your Pelican webpage. An official repository of plugins is maintained &lt;a href="https://github.com/getpelican/pelican-plugins"&gt;here&lt;/a&gt;. We'll be using the &lt;a href="https://github.com/danielfrg/pelican-ipynb"&gt;pelican-ipynb&lt;/a&gt; which at the time of this writing has not yet been incorporated into the official plugin repository.&lt;/p&gt;
+&lt;p&gt;Following &lt;a href="http://cyrille.rossant.net/pelican-github/"&gt;this approach by Cyrille Rossant&lt;/a&gt;, we're going to have a directory for custom plugins(i.e. not in the official repo), &lt;code&gt;plugins/&lt;/code&gt;, and a directory with all of the official plugins, &lt;code&gt;pelican-plugins&lt;/code&gt;. The latter can be added as a submodule. You can off course pick-and-choose which plugins you want and just copy and paste those into a single directory if you want.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ mkdir plugins
+$ git submodule add https://github.com/getpelican/pelican-plugins.git
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;We need to tell Pelican where to look for these plugins and which ones we'll be using. pelican-ipynb depends on &lt;a href="https://github.com/getpelican/pelican-plugins/tree/master/liquid_tags"&gt;Jake Vanderplas's liquid_tags plugin&lt;/a&gt; (included in &lt;code&gt;pelican-plugins&lt;/code&gt;) so we'll need to point to that one too. In &lt;code&gt;pelicanconf.py&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;PLUGIN_PATHS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;pelican-plugins&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;plugins&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;PLUGINS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;liquid_tags.notebook&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;ipynb.liquid&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Follwing the &lt;a href="https://github.com/danielfrg/pelican-ipynb"&gt;pelican-ipynb installation guide&lt;/a&gt;, I've opted for "Mode B: Liquid Tags". This will essentially allow us to inject notebook content straight into a normal &lt;code&gt;.md&lt;/code&gt; file. First, create a directory to store the notebooks,&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;$ mkdir content/notebooks
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;and add a notebook to this new directory (e.g. &lt;code&gt;contents/notebooks/my_test_notebook.ipynb&lt;/code&gt;). Then tell Pelican to preserve the path to this directory so that we can pull content from it. In &lt;code&gt;pelicanconf.py&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;STATIC&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;notebooks&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Finally, we can add this as a blog entry by injecting into a normal Markdown blog entry, &lt;code&gt;contents/hello_jupyter.md&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;Title&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Hello&lt;/span&gt; &lt;span class="n"&gt;Pelican&lt;/span&gt; &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;Jupyter&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;
+&lt;span class="n"&gt;Date&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2016&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;04&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;03&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;54&lt;/span&gt;
+&lt;span class="n"&gt;Category&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Pelican&lt;/span&gt;
+&lt;span class="n"&gt;Tags&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;python&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;jupyter&lt;/span&gt;
+&lt;span class="n"&gt;slug&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;hello&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;jupyter&lt;/span&gt;
+&lt;span class="n"&gt;Authors&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Foo&lt;/span&gt; &lt;span class="n"&gt;Bar&lt;/span&gt;
+&lt;span class="n"&gt;Summary&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;This&lt;/span&gt; &lt;span class="n"&gt;blog&lt;/span&gt; &lt;span class="n"&gt;post&lt;/span&gt; &lt;span class="n"&gt;was&lt;/span&gt; &lt;span class="n"&gt;written&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;Jupyter&lt;/span&gt; &lt;span class="n"&gt;notebook&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="n"&gt;It&lt;/span&gt; &lt;span class="n"&gt;can&lt;/span&gt; &lt;span class="n"&gt;be&lt;/span&gt; &lt;span class="n"&gt;included&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;post&lt;/span&gt; &lt;span class="n"&gt;using&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;liquid&lt;/span&gt; &lt;span class="n"&gt;tag&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+
+&lt;span class="o"&gt;{%&lt;/span&gt; &lt;span class="n"&gt;notebook&lt;/span&gt; &lt;span class="n"&gt;notebooks&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;my_test_notebook&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;ipynb&lt;/span&gt; &lt;span class="o"&gt;%}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This post should now be available on your main blog roll and the content should all be rendered from your Jupyter notebook, figures, LaTeX, Markdown, and all!&lt;/p&gt;
+&lt;h2&gt;Automatic Builds with Travis CI&lt;/h2&gt;
+&lt;p&gt;Now we want to publish our site with GitHub Pages. By default, any content on the &lt;code&gt;master&lt;/code&gt; branch of your repo will be available at &lt;code&gt;&amp;lt;username&amp;gt;.github.io&lt;/code&gt;. Every time we edit our content on the &lt;code&gt;sources&lt;/code&gt; branch and push it to GitHub, we would like these changes to be reflected on our actual site.
+A continuous integration service like &lt;a href="https://travis-ci.org/"&gt;Travis CI&lt;/a&gt; allows you to leverage GitHub's web hooks to trigger builds of your website at each commit to &lt;code&gt;sources&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Login to Travis CI with your GitHub username and enable your &lt;code&gt;&amp;lt;username&amp;gt;.github.io&lt;/code&gt; repository. Then we need to provide a &lt;code&gt;.travis.yml&lt;/code&gt; configuration file to tell Travis what to do at each commit. The &lt;code&gt;.travis.yml&lt;/code&gt; for this blog looks like:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;language&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;python&lt;/span&gt;
+&lt;span class="n"&gt;python&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;2.7&amp;#39;&lt;/span&gt;
+&lt;span class="n"&gt;sudo&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;required&lt;/span&gt;
+&lt;span class="n"&gt;branches&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+  &lt;span class="n"&gt;only&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+  &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;sources&lt;/span&gt;
+&lt;span class="n"&gt;install&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;pip&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="n"&gt;requirements&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;txt&lt;/span&gt;
+&lt;span class="n"&gt;script&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;make&lt;/span&gt; &lt;span class="n"&gt;publish&lt;/span&gt; &lt;span class="n"&gt;github&lt;/span&gt;
+&lt;span class="n"&gt;env&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+  &lt;span class="n"&gt;global&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;secure&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;xxxxxxxxx&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;This tells Travis that we're using Python, version 2.7, that we only want to trigger builds when pushing to the &lt;code&gt;sources&lt;/code&gt; branch, to install every package in our &lt;code&gt;requirements.txt&lt;/code&gt; file, and to run the &lt;code&gt;make&lt;/code&gt; with the &lt;code&gt;publish github&lt;/code&gt; option. This will use &lt;code&gt;ghp-import&lt;/code&gt; to put a copy of everything in &lt;code&gt;output/&lt;/code&gt; on &lt;code&gt;master&lt;/code&gt; and then do a force push to &lt;code&gt;master&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;This last line contains a key that will allow Travis to do a force push to the &lt;code&gt;master&lt;/code&gt; branch. Generate using &lt;a href="http://blog.mathieu-leplatre.info/publish-your-pelican-blog-on-github-pages-via-travis-ci.html"&gt;the instructions listed here&lt;/a&gt;. Finally, in order to give Travis all the permissions it needs for the force push, replace the second line in the &lt;code&gt;github: publish&lt;/code&gt; block of &lt;code&gt;Makefile&lt;/code&gt; with:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;@git push -fq https://&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GH_TOKEN&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;@github.com/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;TRAVIS_REPO_SLUG&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; &lt;span class="k"&gt;$(&lt;/span&gt;GITHUB_PAGES_BRANCH&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The &lt;code&gt;@&lt;/code&gt; symbol in front of this line in the Makefile and the &lt;code&gt;-q&lt;/code&gt; flag suppress all output related to this step in the build. Not doing so will result in your &lt;code&gt;GH_TOKEN&lt;/code&gt;, which we've gone to the trouble of encrypting, being published to your public Travis build logs.&lt;/p&gt;
+&lt;p&gt;That's pretty much it. Author some posts, add a theme and push to the &lt;code&gt;sources&lt;/code&gt; branch and Travis and GitHub should take care of the rest. You can see any errors that get thrown by going to your Travis CI homepage. For a complete working example, &lt;a href="https://github.com/wtbarnes/wtbarnes.github.io/tree/sources"&gt;check out the source for this site on my GitHub page.&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Other Great Resources&lt;/h2&gt;
+&lt;p&gt;Without the plethora of blogs and tutorials on Pelican, GitHub, and Travis that already exist, setting up this blog would have been &lt;strong&gt;much&lt;/strong&gt; more difficult (read &lt;em&gt;impossible&lt;/em&gt;). Here are some resources that I found really helpful while putting this all together:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://cyrille.rossant.net/pelican-github/"&gt;Setting up a blog with Pelican and GitHub Pages, Cyrille Rossant&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://pages.github.com/"&gt;GitHub Pages&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://blog.mathieu-leplatre.info/publish-your-pelican-blog-on-github-pages-via-travis-ci.html"&gt;Publish your Pelican blog on Github pages via Travis-CI, Mathieu Leplatre&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://docs.getpelican.com/en/3.6.3/"&gt;Pelican Docs&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://www.pelicanthemes.com/"&gt;Many examples of Pelican Themes&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://danielfrg.com/blog/2013/02/16/blogging-pelican-ipython-notebook/"&gt;Blogging with IPython notebooks in pelican, Daniel Rodriguez&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</summary><category term="pelican"></category><category term="blogging"></category><category term="jupyter"></category><category term="github"></category><category term="travis-ci"></category></entry><entry><title>Hello Pelican with Jupyter!</title><link href="/hello-jupyter/" rel="alternate"></link><published>2016-03-28T01:31:00-05:00</published><author><name>Will Barnes</name></author><id>tag:,2016-03-28:hello-jupyter/</id><summary type="html">&lt;style type="text/css"&gt;/*!
+*
+* IPython notebook
+*
+*/
+/* CSS font colors for translated ANSI colors. */
+.ansibold {
+  font-weight: bold;
+}
+/* use dark versions for foreground, to improve visibility */
+.ansiblack {
+  color: black;
+}
+.ansired {
+  color: darkred;
+}
+.ansigreen {
+  color: darkgreen;
+}
+.ansiyellow {
+  color: #c4a000;
+}
+.ansiblue {
+  color: darkblue;
+}
+.ansipurple {
+  color: darkviolet;
+}
+.ansicyan {
+  color: steelblue;
+}
+.ansigray {
+  color: gray;
+}
+/* and light for background, for the same reason */
+.ansibgblack {
+  background-color: black;
+}
+.ansibgred {
+  background-color: red;
+}
+.ansibggreen {
+  background-color: green;
+}
+.ansibgyellow {
+  background-color: yellow;
+}
+.ansibgblue {
+  background-color: blue;
+}
+.ansibgpurple {
+  background-color: magenta;
+}
+.ansibgcyan {
+  background-color: cyan;
+}
+.ansibggray {
+  background-color: gray;
+}
+div.cell {
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: vertical;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border-radius: 2px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  width: 100%;
+  padding: 5px;
+  /* This acts as a spacer between cells, that is outside the border */
+  margin: 0px;
+  outline: none;
+  border-left-width: 1px;
+  padding-left: 5px;
+  background: linear-gradient(to right, transparent -40px, transparent 1px, transparent 1px, transparent 100%);
+}
+div.cell.jupyter-soft-selected {
+  border-left-color: #90CAF9;
+  border-left-color: #E3F2FD;
+  border-left-width: 1px;
+  padding-left: 5px;
+  border-right-color: #E3F2FD;
+  border-right-width: 1px;
+  background: #E3F2FD;
+}
+@media print {
+  div.cell.jupyter-soft-selected {
+    border-color: transparent;
+  }
+}
+div.cell.selected {
+  border-color: #ababab;
+  border-left-width: 0px;
+  padding-left: 6px;
+  background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 5px, transparent 5px, transparent 100%);
+}
+@media print {
+  div.cell.selected {
+    border-color: transparent;
+  }
+}
+div.cell.selected.jupyter-soft-selected {
+  border-left-width: 0;
+  padding-left: 6px;
+  background: linear-gradient(to right, #42A5F5 -40px, #42A5F5 7px, #E3F2FD 7px, #E3F2FD 100%);
+}
+.edit_mode div.cell.selected {
+  border-color: #66BB6A;
+  border-left-width: 0px;
+  padding-left: 6px;
+  background: linear-gradient(to right, #66BB6A -40px, #66BB6A 5px, transparent 5px, transparent 100%);
+}
+@media print {
+  .edit_mode div.cell.selected {
+    border-color: transparent;
+  }
+}
+.prompt {
+  /* This needs to be wide enough for 3 digit prompt numbers: In[100]: */
+  min-width: 14ex;
+  /* This padding is tuned to match the padding on the CodeMirror editor. */
+  padding: 0.4em;
+  margin: 0px;
+  font-family: monospace;
+  text-align: right;
+  /* This has to match that of the the CodeMirror class line-height below */
+  line-height: 1.21429em;
+  /* Don't highlight prompt number selection */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Use default cursor */
+  cursor: default;
+}
+@media (max-width: 540px) {
+  .prompt {
+    text-align: left;
+  }
+}
+div.inner_cell {
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: vertical;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  /* Old browsers */
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  box-flex: 1;
+  /* Modern browsers */
+  flex: 1;
+}
+@-moz-document url-prefix() {
+  div.inner_cell {
+    overflow-x: hidden;
+  }
+}
+/* input_area and input_prompt must match in top border and margin for alignment */
+div.input_area {
+  border: 1px solid #cfcfcf;
+  border-radius: 2px;
+  background: #f7f7f7;
+  line-height: 1.21429em;
+}
+/* This is needed so that empty prompt areas can collapse to zero height when there
+   is no content in the output_subarea and the prompt. The main purpose of this is
+   to make sure that empty JavaScript output_subareas have no height. */
+div.prompt:empty {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+div.unrecognized_cell {
+  padding: 5px 5px 5px 0px;
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: horizontal;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+div.unrecognized_cell .inner_cell {
+  border-radius: 2px;
+  padding: 5px;
+  font-weight: bold;
+  color: red;
+  border: 1px solid #cfcfcf;
+  background: #eaeaea;
+}
+div.unrecognized_cell .inner_cell a {
+  color: inherit;
+  text-decoration: none;
+}
+div.unrecognized_cell .inner_cell a:hover {
+  color: inherit;
+  text-decoration: none;
+}
+@media (max-width: 540px) {
+  div.unrecognized_cell &gt; div.prompt {
+    display: none;
+  }
+}
+div.code_cell {
+  /* avoid page breaking on code cells when printing */
+}
+@media print {
+  div.code_cell {
+    page-break-inside: avoid;
+  }
+}
+/* any special styling for code cells that are currently running goes here */
+div.input {
+  page-break-inside: avoid;
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: horizontal;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+@media (max-width: 540px) {
+  div.input {
+    /* Old browsers */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-box-align: stretch;
+    display: -moz-box;
+    -moz-box-orient: vertical;
+    -moz-box-align: stretch;
+    display: box;
+    box-orient: vertical;
+    box-align: stretch;
+    /* Modern browsers */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+/* input_area and input_prompt must match in top border and margin for alignment */
+div.input_prompt {
+  color: #303F9F;
+  border-top: 1px solid transparent;
+}
+div.input_area &gt; div.highlight {
+  margin: 0.4em;
+  border: none;
+  padding: 0px;
+  background-color: transparent;
+}
+div.input_area &gt; div.highlight &gt; pre {
+  margin: 0px;
+  border: none;
+  padding: 0px;
+  background-color: transparent;
+}
+/* The following gets added to the &lt;head&gt; if it is detected that the user has a
+ * monospace font with inconsistent normal/bold/italic height.  See
+ * notebookmain.js.  Such fonts will have keywords vertically offset with
+ * respect to the rest of the text.  The user should select a better font.
+ * See: https://github.com/ipython/ipython/issues/1503
+ *
+ * .CodeMirror span {
+ *      vertical-align: bottom;
+ * }
+ */
+.CodeMirror {
+  line-height: 1.21429em;
+  /* Changed from 1em to our global default */
+  font-size: 14px;
+  height: auto;
+  /* Changed to auto to autogrow */
+  background: none;
+  /* Changed from white to allow our bg to show through */
+}
+.CodeMirror-scroll {
+  /*  The CodeMirror docs are a bit fuzzy on if overflow-y should be hidden or visible.*/
+  /*  We have found that if it is visible, vertical scrollbars appear with font size changes.*/
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+.CodeMirror-lines {
+  /* In CM2, this used to be 0.4em, but in CM3 it went to 4px. We need the em value because */
+  /* we have set a different line-height and want this to scale with that. */
+  padding: 0.4em;
+}
+.CodeMirror-linenumber {
+  padding: 0 8px 0 4px;
+}
+.CodeMirror-gutters {
+  border-bottom-left-radius: 2px;
+  border-top-left-radius: 2px;
+}
+.CodeMirror pre {
+  /* In CM3 this went to 4px from 0 in CM2. We need the 0 value because of how we size */
+  /* .CodeMirror-lines */
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+/*
+
+Original style from softwaremaniacs.org (c) Ivan Sagalaev &lt;Maniac@SoftwareManiacs.Org&gt;
+Adapted from GitHub theme
+
+*/
+.highlight-base {
+  color: #000;
+}
+.highlight-variable {
+  color: #000;
+}
+.highlight-variable-2 {
+  color: #1a1a1a;
+}
+.highlight-variable-3 {
+  color: #333333;
+}
+.highlight-string {
+  color: #BA2121;
+}
+.highlight-comment {
+  color: #408080;
+  font-style: italic;
+}
+.highlight-number {
+  color: #080;
+}
+.highlight-atom {
+  color: #88F;
+}
+.highlight-keyword {
+  color: #008000;
+  font-weight: bold;
+}
+.highlight-builtin {
+  color: #008000;
+}
+.highlight-error {
+  color: #f00;
+}
+.highlight-operator {
+  color: #AA22FF;
+  font-weight: bold;
+}
+.highlight-meta {
+  color: #AA22FF;
+}
+/* previously not defined, copying from default codemirror */
+.highlight-def {
+  color: #00f;
+}
+.highlight-string-2 {
+  color: #f50;
+}
+.highlight-qualifier {
+  color: #555;
+}
+.highlight-bracket {
+  color: #997;
+}
+.highlight-tag {
+  color: #170;
+}
+.highlight-attribute {
+  color: #00c;
+}
+.highlight-header {
+  color: blue;
+}
+.highlight-quote {
+  color: #090;
+}
+.highlight-link {
+  color: #00c;
+}
+/* apply the same style to codemirror */
+.cm-s-ipython span.cm-keyword {
+  color: #008000;
+  font-weight: bold;
+}
+.cm-s-ipython span.cm-atom {
+  color: #88F;
+}
+.cm-s-ipython span.cm-number {
+  color: #080;
+}
+.cm-s-ipython span.cm-def {
+  color: #00f;
+}
+.cm-s-ipython span.cm-variable {
+  color: #000;
+}
+.cm-s-ipython span.cm-operator {
+  color: #AA22FF;
+  font-weight: bold;
+}
+.cm-s-ipython span.cm-variable-2 {
+  color: #1a1a1a;
+}
+.cm-s-ipython span.cm-variable-3 {
+  color: #333333;
+}
+.cm-s-ipython span.cm-comment {
+  color: #408080;
+  font-style: italic;
+}
+.cm-s-ipython span.cm-string {
+  color: #BA2121;
+}
+.cm-s-ipython span.cm-string-2 {
+  color: #f50;
+}
+.cm-s-ipython span.cm-meta {
+  color: #AA22FF;
+}
+.cm-s-ipython span.cm-qualifier {
+  color: #555;
+}
+.cm-s-ipython span.cm-builtin {
+  color: #008000;
+}
+.cm-s-ipython span.cm-bracket {
+  color: #997;
+}
+.cm-s-ipython span.cm-tag {
+  color: #170;
+}
+.cm-s-ipython span.cm-attribute {
+  color: #00c;
+}
+.cm-s-ipython span.cm-header {
+  color: blue;
+}
+.cm-s-ipython span.cm-quote {
+  color: #090;
+}
+.cm-s-ipython span.cm-link {
+  color: #00c;
+}
+.cm-s-ipython span.cm-error {
+  color: #f00;
+}
+.cm-s-ipython span.cm-tab {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAMCAYAAAAkuj5RAAAAAXNSR0IArs4c6QAAAGFJREFUSMft1LsRQFAQheHPowAKoACx3IgEKtaEHujDjORSgWTH/ZOdnZOcM/sgk/kFFWY0qV8foQwS4MKBCS3qR6ixBJvElOobYAtivseIE120FaowJPN75GMu8j/LfMwNjh4HUpwg4LUAAAAASUVORK5CYII=);
+  background-position: right;
+  background-repeat: no-repeat;
+}
+div.output_wrapper {
+  /* this position must be relative to enable descendents to be absolute within it */
+  position: relative;
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: vertical;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  z-index: 1;
+}
+/* class for the output area when it should be height-limited */
+div.output_scroll {
+  /* ideally, this would be max-height, but FF barfs all over that */
+  height: 24em;
+  /* FF needs this *and the wrapper* to specify full width, or it will shrinkwrap */
+  width: 100%;
+  overflow: auto;
+  border-radius: 2px;
+  -webkit-box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+  display: block;
+}
+/* output div while it is collapsed */
+div.output_collapsed {
+  margin: 0px;
+  padding: 0px;
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: vertical;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+div.out_prompt_overlay {
+  height: 100%;
+  padding: 0px 0.4em;
+  position: absolute;
+  border-radius: 2px;
+}
+div.out_prompt_overlay:hover {
+  /* use inner shadow to get border that is computed the same on WebKit/FF */
+  -webkit-box-shadow: inset 0 0 1px #000;
+  box-shadow: inset 0 0 1px #000;
+  background: rgba(240, 240, 240, 0.5);
+}
+div.output_prompt {
+  color: #D84315;
+}
+/* This class is the outer container of all output sections. */
+div.output_area {
+  padding: 0px;
+  page-break-inside: avoid;
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: horizontal;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+div.output_area .MathJax_Display {
+  text-align: left !important;
+}
+div.output_area 
+div.output_area 
+div.output_area img,
+div.output_area svg {
+  max-width: 100%;
+  height: auto;
+}
+div.output_area img.unconfined,
+div.output_area svg.unconfined {
+  max-width: none;
+}
+/* This is needed to protect the pre formating from global settings such
+   as that of bootstrap */
+.output {
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: vertical;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+@media (max-width: 540px) {
+  div.output_area {
+    /* Old browsers */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-box-align: stretch;
+    display: -moz-box;
+    -moz-box-orient: vertical;
+    -moz-box-align: stretch;
+    display: box;
+    box-orient: vertical;
+    box-align: stretch;
+    /* Modern browsers */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+div.output_area pre {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: baseline;
+  color: black;
+  background-color: transparent;
+  border-radius: 0;
+}
+/* This class is for the output subarea inside the output_area and after
+   the prompt div. */
+div.output_subarea {
+  overflow-x: auto;
+  padding: 0.4em;
+  /* Old browsers */
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  box-flex: 1;
+  /* Modern browsers */
+  flex: 1;
+  max-width: calc(100% - 14ex);
+}
+div.output_scroll div.output_subarea {
+  overflow-x: visible;
+}
+/* The rest of the output_* classes are for special styling of the different
+   output types */
+/* all text output has this class: */
+div.output_text {
+  text-align: left;
+  color: #000;
+  /* This has to match that of the the CodeMirror class line-height below */
+  line-height: 1.21429em;
+}
+/* stdout/stderr are 'text' as well as 'stream', but execute_result/error are *not* streams */
+div.output_stderr {
+  background: #fdd;
+  /* very light red background for stderr */
+}
+div.output_latex {
+  text-align: left;
+}
+/* Empty output_javascript divs should have no height */
+div.output_javascript:empty {
+  padding: 0;
+}
+.js-error {
+  color: darkred;
+}
+/* raw_input styles */
+div.raw_input_container {
+  line-height: 1.21429em;
+  padding-top: 5px;
+}
+pre.raw_input_prompt {
+  /* nothing needed here. */
+}
+input.raw_input {
+  font-family: monospace;
+  font-size: inherit;
+  color: inherit;
+  width: auto;
+  /* make sure input baseline aligns with prompt */
+  vertical-align: baseline;
+  /* padding + margin = 0.5em between prompt and cursor */
+  padding: 0em 0.25em;
+  margin: 0em 0.25em;
+}
+input.raw_input:focus {
+  box-shadow: none;
+}
+p.p-space {
+  margin-bottom: 10px;
+}
+div.output_unrecognized {
+  padding: 5px;
+  font-weight: bold;
+  color: red;
+}
+div.output_unrecognized a {
+  color: inherit;
+  text-decoration: none;
+}
+div.output_unrecognized a:hover {
+  color: inherit;
+  text-decoration: none;
+}
+.rendered_html {
+  color: #000;
+  /* any extras will just be numbers: */
+}
+
+
+
+.rendered_html :link {
+  text-decoration: underline;
+}
+.rendered_html :visited {
+  text-decoration: underline;
+}
+
+
+
+
+
+
+.rendered_html h1:first-child {
+  margin-top: 0.538em;
+}
+.rendered_html h2:first-child {
+  margin-top: 0.636em;
+}
+.rendered_html h3:first-child {
+  margin-top: 0.777em;
+}
+.rendered_html h4:first-child {
+  margin-top: 1em;
+}
+.rendered_html h5:first-child {
+  margin-top: 1em;
+}
+.rendered_html h6:first-child {
+  margin-top: 1em;
+}
+
+
+
+
+
+
+
+
+.rendered_html * + ul {
+  margin-top: 1em;
+}
+.rendered_html * + ol {
+  margin-top: 1em;
+}
+
+
+.rendered_html pre,
+
+
+
+.rendered_html tr,
+.rendered_html th,
+
+.rendered_html td,
+
+
+.rendered_html * + table {
+  margin-top: 1em;
+}
+
+.rendered_html * + p {
+  margin-top: 1em;
+}
+
+.rendered_html * + img {
+  margin-top: 1em;
+}
+.rendered_html img,
+
+.rendered_html img.unconfined,
+
+div.text_cell {
+  /* Old browsers */
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  -webkit-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+  -moz-box-align: stretch;
+  display: box;
+  box-orient: horizontal;
+  box-align: stretch;
+  /* Modern browsers */
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+@media (max-width: 540px) {
+  div.text_cell &gt; div.prompt {
+    display: none;
+  }
+}
+div.text_cell_render {
+  /*font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;*/
+  outline: none;
+  resize: none;
+  width: inherit;
+  border-style: none;
+  padding: 0.5em 0.5em 0.5em 0.4em;
+  color: #000;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+a.anchor-link:link {
+  text-decoration: none;
+  padding: 0px 20px;
+  visibility: hidden;
+}
+h1:hover .anchor-link,
+h2:hover .anchor-link,
+h3:hover .anchor-link,
+h4:hover .anchor-link,
+h5:hover .anchor-link,
+h6:hover .anchor-link {
+  visibility: visible;
+}
+.text_cell.rendered .input_area {
+  display: none;
+}
+.text_cell.rendered 
+.text_cell.unrendered .text_cell_render {
+  display: none;
+}
+.cm-header-1,
+.cm-header-2,
+.cm-header-3,
+.cm-header-4,
+.cm-header-5,
+.cm-header-6 {
+  font-weight: bold;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.cm-header-1 {
+  font-size: 185.7%;
+}
+.cm-header-2 {
+  font-size: 157.1%;
+}
+.cm-header-3 {
+  font-size: 128.6%;
+}
+.cm-header-4 {
+  font-size: 110%;
+}
+.cm-header-5 {
+  font-size: 100%;
+  font-style: italic;
+}
+.cm-header-6 {
+  font-size: 100%;
+  font-style: italic;
+}
+&lt;/style&gt;
+&lt;style type="text/css"&gt;.highlight .hll { background-color: #ffffcc }
+.highlight  { background: #f8f8f8; }
+.highlight .c { color: #408080; font-style: italic } /* Comment */
+.highlight .err { border: 1px solid #FF0000 } /* Error */
+.highlight .k { color: #008000; font-weight: bold } /* Keyword */
+.highlight .o { color: #666666 } /* Operator */
+.highlight .ch { color: #408080; font-style: italic } /* Comment.Hashbang */
+.highlight .cm { color: #408080; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #BC7A00 } /* Comment.Preproc */
+.highlight .cpf { color: #408080; font-style: italic } /* Comment.PreprocFile */
+.highlight .c1 { color: #408080; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #408080; font-style: italic } /* Comment.Special */
+.highlight .gd { color: #A00000 } /* Generic.Deleted */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .gr { color: #FF0000 } /* Generic.Error */
+.highlight .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.highlight .gi { color: #00A000 } /* Generic.Inserted */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.highlight .gt { color: #0044DD } /* Generic.Traceback */
+.highlight .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.highlight .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.highlight .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.highlight .kp { color: #008000 } /* Keyword.Pseudo */
+.highlight .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #B00040 } /* Keyword.Type */
+.highlight .m { color: #666666 } /* Literal.Number */
+.highlight .s { color: #BA2121 } /* Literal.String */
+.highlight .na { color: #7D9029 } /* Name.Attribute */
+.highlight .nb { color: #008000 } /* Name.Builtin */
+.highlight .nc { color: #0000FF; font-weight: bold } /* Name.Class */
+.highlight .no { color: #880000 } /* Name.Constant */
+.highlight .nd { color: #AA22FF } /* Name.Decorator */
+.highlight .ni { color: #999999; font-weight: bold } /* Name.Entity */
+.highlight .ne { color: #D2413A; font-weight: bold } /* Name.Exception */
+.highlight .nf { color: #0000FF } /* Name.Function */
+.highlight .nl { color: #A0A000 } /* Name.Label */
+.highlight .nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+.highlight .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.highlight .nv { color: #19177C } /* Name.Variable */
+.highlight .ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mb { color: #666666 } /* Literal.Number.Bin */
+.highlight .mf { color: #666666 } /* Literal.Number.Float */
+.highlight .mh { color: #666666 } /* Literal.Number.Hex */
+.highlight .mi { color: #666666 } /* Literal.Number.Integer */
+.highlight .mo { color: #666666 } /* Literal.Number.Oct */
+.highlight .sb { color: #BA2121 } /* Literal.String.Backtick */
+.highlight .sc { color: #BA2121 } /* Literal.String.Char */
+.highlight .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.highlight .s2 { color: #BA2121 } /* Literal.String.Double */
+.highlight .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
+.highlight .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.highlight .si { color: #BB6688; font-weight: bold } /* Literal.String.Interpol */
+.highlight .sx { color: #008000 } /* Literal.String.Other */
+.highlight .sr { color: #BB6688 } /* Literal.String.Regex */
+.highlight .s1 { color: #BA2121 } /* Literal.String.Single */
+.highlight .ss { color: #19177C } /* Literal.String.Symbol */
+.highlight .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.highlight .vc { color: #19177C } /* Name.Variable.Class */
+.highlight .vg { color: #19177C } /* Name.Variable.Global */
+.highlight .vi { color: #19177C } /* Name.Variable.Instance */
+.highlight .il { color: #666666 } /* Literal.Number.Integer.Long */&lt;/style&gt;
+&lt;style type="text/css"&gt;
+/* Temporary definitions which will become obsolete with Notebook release 5.0 */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-bold { font-weight: bold; }
+&lt;/style&gt;
+&lt;div class="cell border-box-sizing text_cell rendered"&gt;
+&lt;div class="prompt input_prompt"&gt;
+&lt;/div&gt;
+&lt;div class="inner_cell"&gt;
+&lt;div class="text_cell_render border-box-sizing rendered_html"&gt;
+&lt;h1 id="Blogging-with-Jupyter-and-Pelican!"&gt;Blogging with Jupyter and Pelican!&lt;a class="anchor-link" href="#Blogging-with-Jupyter-and-Pelican!"&gt;&amp;#182;&lt;/a&gt;&lt;/h1&gt;&lt;p&gt;In this blog entry, I'll talk about setting up a blog using Pelican and authoring entries using Jupyter notebooks.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="cell border-box-sizing text_cell rendered"&gt;
+&lt;div class="prompt input_prompt"&gt;
+&lt;/div&gt;
+&lt;div class="inner_cell"&gt;
+&lt;div class="text_cell_render border-box-sizing rendered_html"&gt;
+&lt;p&gt;First, try to import some code.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="cell border-box-sizing code_cell rendered"&gt;
+&lt;div class="input"&gt;
+&lt;div class="prompt input_prompt"&gt;In&amp;nbsp;[4]:&lt;/div&gt;
+&lt;div class="inner_cell"&gt;
+    &lt;div class="input_area"&gt;
+&lt;div class=" highlight hl-ipython3"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;numpy&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;np&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;matplotlib.pyplot&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;plt&lt;/span&gt;
+&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="k"&gt;matplotlib&lt;/span&gt; inline
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;div class="cell border-box-sizing code_cell rendered"&gt;
+&lt;div class="input"&gt;
+&lt;div class="prompt input_prompt"&gt;In&amp;nbsp;[5]:&lt;/div&gt;
+&lt;div class="inner_cell"&gt;
+    &lt;div class="input_area"&gt;
+&lt;div class=" highlight hl-ipython3"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;linspace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;div class="cell border-box-sizing code_cell rendered"&gt;
+&lt;div class="input"&gt;
+&lt;div class="prompt input_prompt"&gt;In&amp;nbsp;[7]:&lt;/div&gt;
+&lt;div class="inner_cell"&gt;
+    &lt;div class="input_area"&gt;
+&lt;div class=" highlight hl-ipython3"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;plt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;plot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;linewidth&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;plt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;xlabel&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;r&amp;#39;$x$&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;fontsize&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;plt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ylabel&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;r&amp;#39;$y$&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;fontsize&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;plt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;show&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="output_wrapper"&gt;
+&lt;div class="output"&gt;
+
+
+&lt;div class="output_area"&gt;&lt;div class="prompt"&gt;&lt;/div&gt;
+
+
+&lt;div class="output_png output_subarea "&gt;
+&lt;img src="data:image/png;base64,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
+"
+&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;div class="cell border-box-sizing text_cell rendered"&gt;
+&lt;div class="prompt input_prompt"&gt;
+&lt;/div&gt;
+&lt;div class="inner_cell"&gt;
+&lt;div class="text_cell_render border-box-sizing rendered_html"&gt;
+&lt;p&gt;We can make figures and write &lt;strong&gt;Markdown&lt;/strong&gt;. What about some $\LaTeX$?
+$$
+p=\int\mathrm{d}q\,f(q)\\
+f(q)=\sum_i\ell^{2i}
+$$&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="cell border-box-sizing code_cell rendered"&gt;
+&lt;div class="input"&gt;
+&lt;div class="prompt input_prompt"&gt;In&amp;nbsp;[&amp;nbsp;]:&lt;/div&gt;
+&lt;div class="inner_cell"&gt;
+    &lt;div class="input_area"&gt;
+&lt;div class=" highlight hl-ipython3"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt; 
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: 'center'," +
+        "    displayIndent: '0em'," +
+        "    showMathMenu: true," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['$','$'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }" +
+        "    } " +
+        "}); ";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><category term="pelican"></category><category term="publishing"></category><category term="python"></category><category term="jupyter"></category></entry></feed>
