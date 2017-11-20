@@ -1,0 +1,24 @@
+language: python
+python:
+- '2.7'
+sudo: required
+branches:
+  only:
+  - sources
+before_install:
+- mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive
+install:
+- PATH=$HOME/texlive/bin/x86_64-linux:$PATH
+#- tlmgr update --self
+#- tlmgr install moderncv
+- pip install -r requirements.txt
+before_script:
+- python resume/build_cv.py --md_out_file content/pages/cv.md --pdf_link {filename}/files/cv.pdf
+- pdflatex -output-directory=resume/output/ -aux-directory=resume/output/ resume/output/cv.tex
+- mkdir content/files
+- cp resume/output/cv.pdf content/files/
+script:
+- make publish github
+env:
+  global:
+    secure: KmnXiLkhrNr2sgGS08/A1r6WFXjihfNgkdQB2ZJJDXbVDgn3hxt46w8Kqbv90oqYjZREJZA1TQxzxwkx1IecalVq1szKA0j40bWy4F9FBTL82js1h5rX6T0DV1jIHJ6pFCsFpfiawLjxgwyEn7oBkCrzhA0FUdJi0Zmlsh+3WnFK5KM1qfWKs+AJ9B5Ya+I+XzZXm2gwun3vQmpMiHRTn6MYyzz2Ah1RpXdbzg8jNDHtiuZg1dVUuKfr0rwPV6MJORr0VyXaUXwhR2U8ewKurH/6v9td8LL32FxnYYyiWBgP+qdWkiQJ4VQaNNTAqaU3pk3z7scpJ1cyag5P4Ufrzh6c8KbkHGeuLb9qpyJytD2Fef5bMI5UfkoAods3tmwcT8DvNLI+1I0EhyENRm3aH1V2wnqyBSIjnNLZfx6xPIS5XEUyKdr+YlSuJIQOehgU3AByAV3YllURh4OvGYmx+XwXC0ud7pArWcf3zKKniZI4+6zY0ABkzgGurtC4iGi4zXMkrg7NleeR+lMQFPCNDFgeq4C5kVBfThgOys08VdE4kwrQ3laI6KqW9qM8LUP8WOcwmUYr/kPu1OsWGpiU95b/2S4sH1BEyF0mXGXzUTPUXlnQc5+fS2XejB6nwHF/KG3uqVe9BFPJf5g/08L2z6OL2TsPugpkFdbHb+Lw9UA=
