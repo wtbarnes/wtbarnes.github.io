@@ -1,12 +1,3 @@
-[submodule "themes/pelican-themes"]
-	path = themes/pelican-themes
-	url = https://github.com/getpelican/pelican-themes.git
-[submodule "pelican-plugins"]
-	path = pelican-plugins
-	url = https://github.com/getpelican/pelican-plugins.git
-[submodule "plugins/pelican-ipynb"]
-	path = plugins/pelican-ipynb
-	url = https://github.com/danielfrg/pelican-ipynb.git
 [submodule "resume"]
 	path = resume
 	url = https://github.com/wtbarnes/resume.git
