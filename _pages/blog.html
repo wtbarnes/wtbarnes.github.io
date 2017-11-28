@@ -1,11 +1,13 @@
 ---
 layout: default
+title: Blog
+permalink: Blog
 ---
 <ul>
 {% for p in site.posts %}
     <li>
         <h2><a href="{{ p.url }}">{{ p.title }}</a></h2>
-        <h3 class="lead">{{ p.date | date: '%B %d, %Y' }}</h3>
+        <h6 class="text-muted">{{ p.date | date: '%B %d, %Y' }}</h6>
     </li>
 {% endfor %}
 </ul>
