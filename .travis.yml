@@ -9,11 +9,8 @@ before_install:
 - mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive
 install:
 - PATH=$HOME/texlive/bin/x86_64-linux:$PATH
-#- tlmgr update --self
-#- tlmgr install moderncv
-- pip install -r requirements.txt
 before_script:
-- python resume/build_cv.py --md_out_file content/pages/cv.md --pdf_link {{ site.baseurl }}/static_files/cv.pdf
+- python resume/build_cv.py --md_template cv_template.html --md_out_file _pages/cv.html --pdf_link "{{site.baseurl}}/static_files/cv.pdf"
 - pdflatex -output-directory=resume/output/ -aux-directory=resume/output/ resume/output/cv.tex
 - mkdir static_files
 - cp resume/output/cv.pdf static_files/
