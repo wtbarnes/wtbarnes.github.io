@@ -16,7 +16,9 @@ stack_overflow_username: 4717663/will-barnes
 permalink: pretty
 
 # Build settings
-markdown: redcarpet
+markdown: kramdown
+kramdown:
+  parse_block_html: true
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
