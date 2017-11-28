@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: post
 title: Blogging with Pelican, Jupyter, GitHub, and Travis CI
 summary: A thorough walkthrough of how I setup this blog using Pelican so that I can write posts using Jupyter notebooks and publish it with GitHub Pages and Travis CI.
 ---
