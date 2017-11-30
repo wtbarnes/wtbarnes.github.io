@@ -9,9 +9,8 @@ title: Home
         </div>
         <div class="col-md-8">
             <h1>About Me</h1>
-            <p class="lead">
-                Description of me, etc. etc.
-            </p>
+            {% capture about_me %}{% include about_me.md %}{% endcapture %}
+            {{ about_me | markdownify }}
         </div>
     </div>
 </div>
