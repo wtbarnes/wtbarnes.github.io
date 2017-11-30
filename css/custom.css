@@ -30,8 +30,8 @@ body {
 }
 
 /* Projects */
-.card-footer i {
-  padding-left: 10px;
+.card-header i {
+  padding-left: 5px;
 }
 
 /* Responsive */

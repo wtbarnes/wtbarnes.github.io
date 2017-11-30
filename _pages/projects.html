@@ -10,17 +10,20 @@ permalink: Projects
 {% for code in category.projects %}
     <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
         <div class="card">
-            <div class="card-body">
-            <h4 class="card-title">{{ code.title }}</h4>
-            <p class="card-text">{{ code.description | markdownify }}</p>
+            <div class="card-header">
+                <div class="pull-right">
+                    {% if code.github %}
+                    <a href="{{ code.github }}"><i class="fa fa-github fa-2x"></i></a>
+                    {% endif %}
+                    {% if code.docs %}
+                    <a href="{{ code.docs }}"><i class="fa fa-book fa-2x"></i></a>
+                    {% endif %}
+                </div>
+                <h4 class="card-title text-left">{{ code.title }}</h4>
             </div>
-            <div class="card-footer text-right">
-                {% if code.github %}
-                <a href="{{ code.github }}"><i class="fa fa-github fa-2x"></i></a>
-                {% endif %}
-                {% if code.docs %}
-                <a href="{{ code.docs }}"><i class="fa fa-book fa-2x"></i></a>
-                {% endif %}
+            <!-- <img class="card-img-top" src="http://via.placeholder.com/350x150" alt="Card image cap"> -->
+            <div class="card-body">
+            <p class="card-text">{{ code.description | markdownify }}</p>
             </div>
         </div>
     </div>
