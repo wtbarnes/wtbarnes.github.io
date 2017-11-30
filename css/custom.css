@@ -3,10 +3,17 @@ body {
   padding-bottom: 80px;
 }
 
+/* Navigation Bar */
 .navbar {
   padding-bottom: 20px;
 }
 
+.navbar-brand i {
+  padding-right: 5px;
+  vertical-align:middle;
+}
+
+/* Footer */
 .footer {
     /*position: absolute;*/
     bottom: 0;
@@ -22,13 +29,20 @@ body {
   vertical-align: middle;      
 }
 
-.navbar-brand i {
-  padding-right: 5px;
-  vertical-align:middle;
+/* Projects */
+.card-footer i {
+  padding-left: 10px;
 }
 
+/* Responsive */
 @media (max-width: 767px) {
   .footer .text-xs-center {
     text-align: center;
   } 
+}
+
+@media (max-width: 991px) {
+  body {
+    padding-bottom: 160px;
+  }
 }
