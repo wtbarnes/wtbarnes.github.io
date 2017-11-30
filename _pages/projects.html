@@ -3,21 +3,28 @@ layout: default
 title: Projects
 permalink: Projects
 ---
-<h2>Code I've Developed</h2>
-<ul class="list-group">
-{% for code in site.data.projects.personal%}
-    <li class="list-group-item">
-        <h4>{{ code.title }}</h4>
-        <p>{{ code.description | markdownify }}</p>
-    </li>
+{% for category in site.data.projects %}
+<div class="container" style="padding-bottom:15px;">
+<h2>{{ category.title }}</h2>
+<div class="row">
+{% for code in category.projects %}
+    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+        <div class="card">
+            <div class="card-body">
+            <h4 class="card-title">{{ code.title }}</h4>
+            <p class="card-text">{{ code.description | markdownify }}</p>
+            </div>
+            <div class="card-footer text-right">
+                {% if code.github %}
+                <a href="{{ code.github }}"><i class="fa fa-github fa-2x"></i></a>
+                {% endif %}
+                {% if code.docs %}
+                <a href="{{ code.docs }}"><i class="fa fa-book fa-2x"></i></a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 {% endfor %}
-</ul>
-<h2>Packages I've Contributed to</h2>
-<ul class="list-group">
-{% for code in site.data.projects.contributing%}
-    <li class="list-group-item">
-        <h4>{{ code.title }}</h4>
-        <p>{{ code.description | markdownify }}</p>
-    </li>
+</div>
+</div>
 {% endfor %}
-</ul>
