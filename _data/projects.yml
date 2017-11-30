@@ -1,16 +1,21 @@
-personal:
-- title: fiasco
-  description: fiasco provides a Python interface to the CHIANTI atomic database
-  github: "https://github.com/wtbarnes/fiasco"
-- title: hissw
-  description: hissw is a miniature package for easily fitting small SSWIDL scripts into Python workflows.
-  github: "https://github.com/wtbarnes/hissw"
-contributing:
-- title: ChiantiPy
-  description: ChiantiPy is a library for parsing the CHIANTI atomic database started and maintained by Ken Dere. I've made several major contributions to ChiantiPy, including setting up the testing framework and documentation builds on Read the Docs as well as rewriting the module for calculating continuum emission.
-  github: "https://github.com/chianti-atomic/ChiantiPy/"
-  docs: "http://chiantipy.readthedocs.io"
-- title: ebtel++
-  description: ebtel++ (or ebtelPlusPlus) is a hydrodynamic code for computing efficient, two-fluid solutions to dynamically-heated coronal loops. I am the primary author of ebtel++, but the code is maintained and hosted by the Solar Physics Group at Rice University. The Enthalpy-based Thermal Evolution of Loops (EBTEL) model was originally developed by Klimchuk, Patsourakos, and Cargill. 
-  github: "https://github.com/rice-solar-physics/ebtelPlusPlus"
-  docs: "http://rice-solar-physics.github.io/ebtelPlusPlus/"
+- title: Personal
+  projects:
+  - title: fiasco
+    description: fiasco provides a high-level Python interface to the CHIANTI atomic database and provides many common derived quantities, including ionization equilibria and emissivities.
+    github: "https://github.com/wtbarnes/fiasco"
+  - title: hissw
+    description: hiSSW allows you to include and execute SSW IDL code in Python, e.g. in Jupyter notebooks.
+    github: "https://github.com/wtbarnes/hissw"
+  - title: synthesizAR
+    description: synthesizAR is a framework for forward-modeling emission from solar active regions. Time-dependent models of active regions with arbitrary geometry can be built up using any field-aligned hydrodynamic code. This project comprises the bulk of my PhD thesis.
+    github: "https://github.com/wtbarnes/synthesizAR"
+- title: Contributing
+  projects:
+  - title: ChiantiPy
+    description: ChiantiPy is a library for parsing the CHIANTI atomic database started and maintained by Ken Dere. I've made several major contributions to ChiantiPy, including setting up the testing framework and documentation builds on Read the Docs as well as rewriting the module for calculating continuum emission.
+    github: "https://github.com/chianti-atomic/ChiantiPy/"
+    docs: "http://chiantipy.readthedocs.io"
+  - title: ebtel++
+    description: ebtel++ (or ebtelPlusPlus) is a hydrodynamic code for computing efficient, two-fluid solutions to dynamically-heated coronal loops based on the EBTEL model of [Klimchuk et al., (2008)](http://adsabs.harvard.edu/abs/2008ApJ...682.1351K). I am the primary author of ebtel++, but the code is maintained and hosted by the Solar Physics Group at Rice University.
+    github: "https://github.com/rice-solar-physics/ebtelPlusPlus"
+    docs: "http://rice-solar-physics.github.io/ebtelPlusPlus/"
