@@ -4,7 +4,8 @@ year: 2017
 email: will.t.barnes@gmail.com
 description: "Will Barnes is a PhD student in solar physics interested in open-source software and scientific computing."
 baseurl: "" 
-url: "https://wtbarnes.github.io/" 
+url: "https://wtbarnes.github.io/"
+repo: "https://github.com/wtbarnes/wtbarnes.github.io"
 
 permalink: pretty
 
