@@ -1,3 +1,5 @@
+# provides file_exists plugin
+# see https://github.com/michaelx/jekyll_file_exists
 module Jekyll
   class FileExistsTag < Liquid::Tag
 
