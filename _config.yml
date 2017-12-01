@@ -2,23 +2,23 @@
 title: Will Barnes
 year: 2017
 email: will.t.barnes@gmail.com
-description: "Will Barnes is a PhD student in solar physics interested open-source software and scientific computing."
+description: "Will Barnes is a PhD student in solar physics interested in open-source software and scientific computing."
 baseurl: "" 
 url: "https://wtbarnes.github.io/" 
 
-# Social
-twitter_username: wtbarnes_
-github_username:  wtbarnes
-stack_overflow_username: 4717663/will-barnes
-
 permalink: pretty
 
-# Build settings
+# Markdown and syntax highlighting
 markdown: kramdown
 kramdown:
   input: GFM
   syntax_highlighter: rouge
   parse_block_html: true
+
+# Social
+twitter_username: wtbarnes_
+github_username:  wtbarnes
+stack_overflow_username: 4717663/will-barnes
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
