@@ -3,4 +3,10 @@ layout: default
 title: CV
 permalink: CV
 ---
+{% capture cv %}{% file_exists _includes/cv.html %}{% endcapture %}
+{% if cv == "true" %}
+{% capture cv_content %}{% include cv.html %}{% endcapture %}
+{{ cv_content | markdownify }}
+{% else %}
 <div class="lead text-center">Oops! My CV didn't render. You can still find the source on <a href="https://github.com/wtbarnes/resume">GitHub</a></div>
+{% endif %}
