@@ -19,3 +19,7 @@
     description: Efficient hydrodynamic code for modeling dynamic evolution of coronal loops. Based on the EBTEL model of [Klimchuk et al., (2008)](http://adsabs.harvard.edu/abs/2008ApJ...682.1351K). I am the primary author of ebtel++, but the code is maintained and hosted by the Solar Physics Group at Rice University.
     github: "https://github.com/rice-solar-physics/ebtelPlusPlus"
     docs: "http://rice-solar-physics.github.io/ebtelPlusPlus/"
+  - title: solarbextrapolation
+    description: Python package for extrapolating three-dimensional magnetic field models from observed magnetograms
+    github: "https://github.com/sunpy/solarbextrapolation" 
+    docs: "http://docs.sunpy.org/projects/solarbextrapolation/en/latest/"
