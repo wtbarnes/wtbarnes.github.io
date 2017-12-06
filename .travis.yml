@@ -1,7 +1,10 @@
-language: python
+language: ruby
+rvm:
+- 2.3
 python:
-- '2.7'
+- '3.6'
 sudo: required
+dist: trusty
 branches:
   only:
   - sources
@@ -9,13 +12,18 @@ before_install:
 - mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive
 install:
 - PATH=$HOME/texlive/bin/x86_64-linux:$PATH
+- pip install yaml jinja2 doctr
+- gem install bundler
+- bundle install
 before_script:
-- python resume/build_cv.py --md_template cv_template.html --md_out_file _pages/cv.html --pdf_link "{{site.baseurl}}/static_files/cv.pdf"
+- python resume/build_cv.py --md_template cv_template.html --md_out_file _includes/cv.html --pdf_link "{{site.url}}/static_files/cv.pdf"
 - pdflatex -output-directory=resume/output/ -aux-directory=resume/output/ resume/output/cv.tex
 - mkdir static_files
 - cp resume/output/cv.pdf static_files/
 script:
-- make publish github
+- set -e
+- bundle exec jekyll build --destination site
+- doctr deploy . --built-docs site/ --deploy-branch-name master
 env:
   global:
-    secure: KmnXiLkhrNr2sgGS08/A1r6WFXjihfNgkdQB2ZJJDXbVDgn3hxt46w8Kqbv90oqYjZREJZA1TQxzxwkx1IecalVq1szKA0j40bWy4F9FBTL82js1h5rX6T0DV1jIHJ6pFCsFpfiawLjxgwyEn7oBkCrzhA0FUdJi0Zmlsh+3WnFK5KM1qfWKs+AJ9B5Ya+I+XzZXm2gwun3vQmpMiHRTn6MYyzz2Ah1RpXdbzg8jNDHtiuZg1dVUuKfr0rwPV6MJORr0VyXaUXwhR2U8ewKurH/6v9td8LL32FxnYYyiWBgP+qdWkiQJ4VQaNNTAqaU3pk3z7scpJ1cyag5P4Ufrzh6c8KbkHGeuLb9qpyJytD2Fef5bMI5UfkoAods3tmwcT8DvNLI+1I0EhyENRm3aH1V2wnqyBSIjnNLZfx6xPIS5XEUyKdr+YlSuJIQOehgU3AByAV3YllURh4OvGYmx+XwXC0ud7pArWcf3zKKniZI4+6zY0ABkzgGurtC4iGi4zXMkrg7NleeR+lMQFPCNDFgeq4C5kVBfThgOys08VdE4kwrQ3laI6KqW9qM8LUP8WOcwmUYr/kPu1OsWGpiU95b/2S4sH1BEyF0mXGXzUTPUXlnQc5+fS2XejB6nwHF/KG3uqVe9BFPJf5g/08L2z6OL2TsPugpkFdbHb+Lw9UA=
+    secure: "ynaTam1madBRwY/zDo7VDWk8LFxeKUjpO+K+h6fubPZbr+SN3Iiax+gK8q1sHsjzK7T0wdj2tIHEg8XVppbx1Dw7mm822Kpa3PodjkObx0PDpYB7B3yVyaj3EvpSCpi4lTmGUZR4mxN7zCpKgK1A+hxP/RX/ExxZ5WegbK9Tn5RdcWMfIcZpRf7UOuNL8WZWEo6ayqZsDGX/WeB4zKHOZfWgzYinqbcxl5HiHKzFIMIooQxbpI7ZFZgzOjSMCBkdcelOsTMjp9xiGQfr8pi9X9ExLzmfoMlBx31SMfAnqezUquu9iD8cGDzhcwvwzKIo8NjXOCzyLBxsvMFSg3ADKlP2qWAPZ3YPUpWL3EVk6hDa6U0rY/q76cJPr1RTb+8TT/LZIXD1PDBqR6WiOMZKrOQhxYlKhWlEu2OjJThZRtaCSdglEuh+V1ofHPld8J9R42XtGrAn8aA7J1hEvNvukxkf1pyGati8QgsHoq0U2UkC/M8z2gtAaJAGf96PFP/IQu0ukkcSkW/oTeXTGhbQtsmT/N1vHYcDvIMZEde1UkGdje7nmkCLqbzuk1LJe+n5/gms+VaDOEAwquOe2/PquQbwqd6/LQfnhtrLKezQKD8yS7INa1vZC6/iaY3W6TSP1uGaLT03OaaE60MmyNNldw/JCTH4RQP0+zlpEHeUepo="
