@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+<title>Will Barnes: CV</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/custom.css">
+<!-- Enable different syntax highlighting styles here -->
+<!-- <link rel="stylesheet" href="/css/rouge.base16.syntax.css"> -->
+<link rel="stylesheet" href="/css/rouge.github.syntax.css">
+<!-- Favicon -->
+<link rel="shortcut icon" href="/images/favicon.png">
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+<script src="https://use.fontawesome.com/fae2893fed.js"></script>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid">
+    <a class="navbar-brand" href="https://wtbarnes.github.io/">
+        <i class="fa fa-sun-o fa-3x"></i>
+        <i class="fa fa-plus fa-1x"></i>
+        <i class="fa fa-code fa-3x"></i> 
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link h5 " href="https://wtbarnes.github.io/">Home</a>
+            </li>
+            
+            
+            
+                     
+            <li class="nav-item">
+                <a class="nav-link h5 " href="/Blog">Blog</a>
+            </li>
+            
+            
+                     
+            <li class="nav-item">
+                <a class="nav-link h5 active" href="/CV">CV</a>
+            </li>
+            
+            
+            
+            
+                     
+            <li class="nav-item">
+                <a class="nav-link h5 " href="/Projects">Projects</a>
+            </li>
+            
+            
+        </ul>
+    </div>
+    </div>
+</nav>
+        <div class="container">
+            
+
+
+
+<h2>Education</h2>
+<ul>
+
+
+<li class="lead">Ph.D. Physics, 2016-present (expected 2018) / Rice University  / Thesis: Modeling Hot Plasma in the Solar Corona (working title) / Advisor: Stephen Bradshaw, Ph.D.</li>
+
+<li class="lead">M.S. Physics, 2013-2016 / Rice University </li>
+
+<li class="lead">B.S. Astrophysics, 2009-2013 / Baylor University  / Thesis: Astrophysical Applications of Dusty Plasma Physics, Advisor: Lorin Matthews, Ph.D. / University Honors Program, Magna Cum Laude, Phi Beta Kappa / Minors: Mathematics, Great Texts of the Western Tradition</li>
+
+
+</ul>
+
+<h2>Computing Skills</h2>
+<ul>
+
+
+<li class="lead">Languages: Bash, C, C++, Python</li>
+
+<li class="lead">Scientific Computing: IDL, Mathematica, MATLAB, NumPy, SciPy, SLURM, TORQUE</li>
+
+<li class="lead">Markup: CSS, HTML, LaTeX, markdown, reStructuredText</li>
+
+<li class="lead">DevOps: git/GitHub, Travis CI, Sphinx</li>
+
+
+</ul>
+
+<h2>Publications</h2>
+<ul>
+
+
+<li class="lead">W.T. Barnes, P.J. Cargill, and S.J. Bradshaw, <em>Inference of Heating Properties from Hot Non-flaring Plasmas in Active Region Cores II. Nanoflare Trains</em>, ApJ, 2016, <a href="http://adsabs.harvard.edu/abs/2016ApJ...833..217B"><em>2016ApJ...833..217B</em></a></li>
+
+<li class="lead">W.T. Barnes, P.J. Cargill, and S.J. Bradshaw, <em>Inference of Heating Properties from Hot Non-flaring Plasmas in Active Region Cores I. Single Nanoflares</em>, ApJ, 2016, <a href="http://adsabs.harvard.edu/abs/2016ApJ...829...31B"><em>2016ApJ...829...31B</em></a></li>
+
+
+</ul>
+
+<h2>Talks and Posters</h2>
+<ul>
+
+
+<li class="lead"><strong>Poster</strong>: <a href="http://dsconference.rice.edu/program/"><em>Timelag Analysis of Global Hydrodynamic Simulations of Active Regions in the Solar Corona</em></a> / Rice Data Science Conference / Rice University / Houston, TX / 9-10 October 2017</li>
+
+<li class="lead"><strong>Poster</strong>: <a href="http://shinecon.org/shine2017/ViewAbstract.php?idabs=80"><em>Modeling Observable Signatures of Nanoflare Heating Frequency in Active Region Cores</em></a> / SHINE Workshop / National Science Foundation / Saint-Sauveur, Quebec, CA / 24-28 July 2017</li>
+
+<li class="lead"><strong>Talk</strong>: <a href="https://youtu.be/79ledxbnrPU"><em>ChiantiPy: a Python package for Astrophysical Spectroscopy</em></a> / SciPy: Scientific Computing in Python / SciPy, Enthought / Austin, TX / 10-16 July 2017</li>
+
+<li class="lead"><strong>Talk</strong>: <a href="https://wtbarnes.github.io/loops-workshop-2017-talk/"><em>Constraining Nanoflare Heating Frequency with a Global Active Region Model</em></a> / Coronal Loops Workshop VIII / INAF IASF Palermo / Palermo, Italy / 27-30 June 2017</li>
+
+<li class="lead"><strong>Talk</strong>: <em>A Framework for Forward Modeling Solar Active Regions</em> / Space Physics Seminar Series / Rice University / Houston, TX / 27 February 2017</li>
+
+<li class="lead"><strong>Poster</strong>: <a href="http://shinecon.org/shine2016/ViewAbstract.php?idabs=132"><em>Understanding the Impact of Nanoflare Heating Frequency on the Observed Emission Measure Distribution</em></a> / Solar Heliospheric and Interplanetary Environment (SHINE) Workshop / National Science Foundation / Santa Fe, NM / 11-15 July 2016</li>
+
+<li class="lead"><strong>Talk</strong>: <a href="http://adsabs.harvard.edu/abs/2016SPD....4720203B"><em>Hot Non-flaring Plasmas in Active Region Cores Heated by Single Nanoflares</em></a> / 47th Annual Solar Physics Division Meeting / American Astronomical Society / Boulder, CO / 31 May-3 June 2016</li>
+
+<li class="lead"><strong>Talk</strong>: <em>Impacts of Two-fluid Effects on Emission from Impulsively Heated Coronal Loops</em> / Space Physics Seminar Series / Rice University / Houston, TX / 9 November 2015</li>
+
+<li class="lead"><strong>Poster</strong>: <em>Effects of Ion Heating on Emission Measure of Coronal Loops in Active Region Cores</em> / Coronal Loop Workshop VII / Unversity of Cambridge / Cambridge, UK / 21-23 July 2015</li>
+
+<li class="lead"><strong>Poster</strong>: <a href="http://adsabs.harvard.edu/abs/2015TESS....120306B"><em>Nonnegative Matrix Factorization as a Method for Studying Coronal Heating</em></a> / Triennial Earth-Sun Summit / American Astronomical Society / Indianapolis, IN / 26-30 April 2015</li>
+
+<li class="lead"><strong>Poster</strong>: <a href="http://adsabs.harvard.edu/abs/2013LPI....44.1897B"><em>Dust Grain Growth in a Protoplanetary Disk: Effects of Location on Charge and Size</em></a> / 44th Annual Lunar and Planetary Science Conference / Lunar and Planetary Science Institute / The Woodlands, TX / 18-22 March 2013</li>
+
+<li class="lead"><strong>Talk</strong>: <em>Dust Grain Charging in a Protoplanetary Disk</em> / Texas Undergraduate Astronomy Research Symposium / Texas A&amp;M University / College Station, TX / 14 September 2012</li>
+
+
+</ul>
+
+<div class="lead text-center">
+  <p>A complete version of my CV can be found <a href="https://wtbarnes.github.io//static_files/cv.pdf">here</a></p>
+</div>
+
+
+        </div>
+        <div class="footer fixed-bottom">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-7 col-lg-6 text-xs-center text-sm-center text-md-left text-lg-left">
+                <!-- Copyright and credit -->
+                <p><a href="https://github.com/wtbarnes/wtbarnes.github.io">&copy; 2017 Will Barnes</a> / Built with <a href="https://jekyllrb.com/">Jekyll</a> / Designed with <a href="https://getbootstrap.com/">Bootstrap</a></p>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-5 col-lg-6 text-xs-center text-sm-center text-md-right text-lg-right">
+                <!-- Social links -->
+                <a href="https://github.com/wtbarnes"><i class="fa fa-github fa-2x"></i></a>
+                <a href="https://twitter.com/wtbarnes_"><i class="fa fa-twitter fa-2x"></i></a>
+                <a href="https://stackoverflow.com/users/4717663/will-barnes"><i class="fa fa-stack-overflow fa-2x"></i></a>
+                <a href="mailto:will.t.barnes@gmail.com"><i class="fa fa-envelope fa-2x"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+</html>
