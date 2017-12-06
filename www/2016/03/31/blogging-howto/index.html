@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+<title>Will Barnes: Blogging with Pelican, Jupyter, GitHub, and Travis CI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/custom.css">
+<!-- Enable different syntax highlighting styles here -->
+<!-- <link rel="stylesheet" href="/css/rouge.base16.syntax.css"> -->
+<link rel="stylesheet" href="/css/rouge.github.syntax.css">
+<!-- Favicon -->
+<link rel="shortcut icon" href="/images/favicon.png">
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+<script src="https://use.fontawesome.com/fae2893fed.js"></script>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid">
+    <a class="navbar-brand" href="https://wtbarnes.github.io/">
+        <i class="fa fa-sun-o fa-3x"></i>
+        <i class="fa fa-plus fa-1x"></i>
+        <i class="fa fa-code fa-3x"></i> 
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link h5 " href="https://wtbarnes.github.io/">Home</a>
+            </li>
+            
+            
+            
+                     
+            <li class="nav-item">
+                <a class="nav-link h5 " href="/Blog">Blog</a>
+            </li>
+            
+            
+                     
+            <li class="nav-item">
+                <a class="nav-link h5 " href="/CV">CV</a>
+            </li>
+            
+            
+            
+            
+                     
+            <li class="nav-item">
+                <a class="nav-link h5 " href="/Projects">Projects</a>
+            </li>
+            
+            
+        </ul>
+    </div>
+    </div>
+</nav>
+        <div class="container">
+            <h1>Blogging with Pelican, Jupyter, GitHub, and Travis CI</h1>
+<h5 class="text-muted">March 31, 2016</h5>
+<p><strong>ANOTHER EDIT:</strong> I’ve since moved away from using Pelican for this blog, but these instructions should still be useful to some.</p>
+
+<p><strong>EDIT:</strong> Updated push commands in Makefile to fix <code class="highlighter-rouge">GH_TOKEN</code> security flaw.</p>
+
+<p>As a graduate student in physics, I wanted to maintain a personal webpage to advertise my current research projects to other researchers in my field and for the purpose of shamelessly self-promoting the few skills I’ve gained in graduate school in case I might one day want a real job.</p>
+
+<p>I had previously built a single-page website that was hosted on my department’s archaic SuSE Enterprise Linux server. This had a few downsides. To add content meant editing the raw HTML which often discouraged me from updating my page. Additionally, once I had made the desired changes on my local copy, I had to push the changes to GitHub and then ssh into the server and pull down the changes manually.</p>
+
+<p>Pelican (and other static-site generators like <a href="https://jekyllrb.com/">Jekyll</a>) solves this problem by letting you write all of your posts in Markdown and then auto-generating the HTML. I also found that <a href="http://cyrille.rossant.net/pelican-github/">several other people had looked into writing blog posts with Jupyter notebooks</a> and had even <a href="http://danielfrg.com/blog/2013/02/16/blogging-pelican-ipython-notebook/">written Pelican plugins</a> to make this process easier! This made Pelican a natural choice for someone already familiar with Python and who wants to write blog posts that may include a mixture of equations, code, figures, and (Markdown) text.</p>
+
+<p>Below I’ve detailed how I setup this blog using Pelican so that I can write posts in both Markdown and Jupyter notebooks and then publish the site on GitHub Pages using Travis CI. I’ve made sure to link to the many blogs/docs that helped me so make sure to check out all of those links as well.</p>
+
+<h2 id="github-pages">GitHub Pages</h2>
+<p>Because we’re going to host the blog on GitHub, we need to <a href="https://pages.github.com/">set up a GitHub Pages repository</a>. Basically this just involves creating a repository with the name <code class="highlighter-rouge">&lt;username&gt;.github.io</code> (where <code class="highlighter-rouge">&lt;username&gt;</code> is your GitHub username). Once you’ve created the repository, clone it and change into that directory:</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span>git clone https://github.com/&lt;username&gt;.github.io.git
+<span class="nv">$ </span><span class="nb">cd</span> &lt;username&gt;.github.io
+</code></pre>
+  </div>
+</div>
+<p>For a user site, GitHub will look for content on the <code class="highlighter-rouge">master</code> branch of the repo. Because we want to separate the files we’ll be authoring and the actual content that will get served to the page, we’ll create a new branch, call it <code class="highlighter-rouge">sources</code>, where we’ll do all of our work. Create the branch and switch to it:</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span>git branch sources
+<span class="nv">$ </span>git checkout sources
+</code></pre>
+  </div>
+</div>
+
+<h2 id="pelican">Pelican</h2>
+<p><a href="http://blog.getpelican.com/">Pelican</a> is a static site-generator written in Python. Think <a href="https://jekyllrb.com/">Jekyll</a>, but in Python instead of Ruby. Because we’ll be working in Python, we can easily leverage the power of virtual environments via <code class="highlighter-rouge">conda</code>. You can also do this with <code class="highlighter-rouge">virtualenv</code>; most of the setup commands are roughly the same. (<strong>Note:</strong> If you aren’t using <a href="https://www.continuum.io/">Anaconda</a> to manage your Python installation, you’re missing out.)</p>
+
+<p>Let’s setup an environment for our webpage and give it an original name, and activate it,</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span>conda create <span class="nt">--name</span> webpage <span class="nv">python</span><span class="o">=</span>2.7
+<span class="nv">$ </span><span class="nb">source </span>activate webpage
+</code></pre>
+  </div>
+</div>
+<p>Because we’ve isolated ourselves from the rest of our Python installation, we can easily manage all of the dependencies we need to get our blog up and running. First, let’s install Pelican, Markdown and <code class="highlighter-rouge">ghp-import</code> (for force pushing content to <code class="highlighter-rouge">master</code>):</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span>pip install pelican markdown ghp-import
+</code></pre>
+  </div>
+</div>
+
+<p>Additionally, I found that I needed Jupyter and IPython in order to get the IPython notebooks plugin to work so let’s go ahead and grab that too. (<strong>Note:</strong> Jupyter comes with a lot of dependencies so this may cause you’re install to be a bit bloated. Some packages can probably be safely removed though I haven’t looked into this):</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span>pip install jupyter ipython
+</code></pre>
+  </div>
+</div>
+
+<p>This should be all the dependencies we need so let’s go ahead and save all of the required modules:</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span>pip freeze <span class="o">&gt;</span> requirements.txt
+</code></pre>
+  </div>
+</div>
+
+<p>This will make our Travis CI build much easier to configure.</p>
+
+<p>It’s finally time to build the site. To build the directory structure and create some of the needed files:</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span>pelican-quickstart
+</code></pre>
+  </div>
+</div>
+<p>Answer all of the questions according to how you want to setup your site. There will be a series of questions relating to how you want to publish your webpage. Answer <code class="highlighter-rouge">n</code> to all (<code class="highlighter-rouge">FTP</code>,<code class="highlighter-rouge">SSH</code>,<code class="highlighter-rouge">Dropbox</code>,<code class="highlighter-rouge">S3</code>,<code class="highlighter-rouge">Rackspace Cloud Files</code>) except <code class="highlighter-rouge">GitHub pages</code>. This will auto-generate a Makefile option to make publishing easy. The resulting directory tree should look something like this:</p>
+
+<div class="highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code>├── Makefile
+├── content/          #put your content here
+├── develop_server.sh
+├── fabfile.py
+├── output/           #auto-generated content will go here
+├── pelicanconf.py
+└── publishconf.py
+</code></pre>
+  </div>
+</div>
+
+<p>The <code class="highlighter-rouge">pelicanconf.py</code> file defines all of the configuration for your site and has been pre-populated with the answers you supplied during the quickstart.</p>
+
+<p>Pelican assumes any <code class="highlighter-rouge">.md</code> file inside of <code class="highlighter-rouge">content/</code> is a blog entry and will treat it as such. See <a href="http://docs.getpelican.com/en/stable/content.html">here</a> for more info on authoring content. Put any non-blog pages (e.g. “About”, “Contact”, “CV”, etc.) in a subdirectory <code class="highlighter-rouge">content/pages/</code>. Pelican will treat these as <a href="http://docs.getpelican.com/en/stable/content.html#pages">non-chronological</a> rather than just listing them in the blogroll.</p>
+
+<h2 id="testing-locally">Testing Locally</h2>
+<p>Time to make some content and see if this worked! Write a test blog post and put it in <code class="highlighter-rouge">content/</code> and a test About-me page and put it in <code class="highlighter-rouge">content/pages/</code>:</p>
+
+<h3 id="contentmy_first_blogmd"><code class="highlighter-rouge">content/my_first_blog.md</code></h3>
+
+<div class="language-markdown highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code>Title: Blogging with Pelican, Jupyter, GitHub, and Travis CI
+Date: 2016-04-02 18:05
+Category: Pelican
+Tags: pelican, blogging, test
+slug:a_test
+Authors: Foo Bar
+Summary: A test blog entry
+
+This is my first blog entry and it is a test.
+</code></pre>
+  </div>
+</div>
+
+<h3 id="contentpagesaboutmd"><code class="highlighter-rouge">content/pages/about.md</code></h3>
+
+<div class="language-markdown highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nn">---</span>
+<span class="na">Title</span><span class="pi">:</span> <span class="s">About</span>
+<span class="nn">---</span>
+
+This is the about me page. Here are some things about me.
+</code></pre>
+  </div>
+</div>
+
+<p>Now that we’ve written some content, we need to generate the raw HTML. The Makefile generated by <code class="highlighter-rouge">pelican-quickstart</code> gives us an option for doing this:</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span>make html
+</code></pre>
+  </div>
+</div>
+
+<p>If you take a look in <code class="highlighter-rouge">output/</code>, you’ll see all of your content there. However, for testing your site locally, it’d be nice to have these served and updated automatically. Again, the makefile provides us this option:</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span>make devserver
+</code></pre>
+  </div>
+</div>
+
+<p>If you navigate to <code class="highlighter-rouge">localhost:8000</code>, you should see your page. As you make changes (e.g. add posts and pages, change themes, etc.), you should see these reflected your served HTML. To stop the server:</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span>make stopserver
+</code></pre>
+  </div>
+</div>
+
+<h2 id="installing-themes">Installing themes</h2>
+<p>To customize the look of your webpage, Pelican provides the <code class="highlighter-rouge">THEME</code> variable in <code class="highlighter-rouge">pelicanconf.py</code>. <a href="http://www.pelicanthemes.com/">There are many different Pelican themes</a> and an official repository is maintained <a href="https://github.com/getpelican/pelican-themes">here</a>. This website uses the <a href="https://github.com/DandyDev/pelican-bootstrap3">pelican-bootstrap3 theme</a>. To install a theme, first create a directory to store them (you may want to switch between a few):</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span>mkdir themes/
+</code></pre>
+  </div>
+</div>
+
+<p>You can either just copy the directory containing the theme you want into here or add the theme repository as a submodule. I’ve opted for the latter so that I can incorporate any updates to the theme:</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd </span>themes/
+<span class="nv">$ </span>git submodule add https://github.com/&lt;theme_user&gt;/&lt;theme_repo&gt;.git
+</code></pre>
+  </div>
+</div>
+
+<p>Pelican also includes <a href="http://docs.getpelican.com/en/stable/pelican-themes.html">a tool for installing and managing your themes</a>. Once you have the theme installed, set the <code class="highlighter-rouge">THEME</code> variable in <code class="highlighter-rouge">pelicanconf.py</code> appropriately:</p>
+
+<div class="language-python highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="n">THEME</span><span class="o">=</span><span class="s">'themes/&lt;my_installed_theme&gt;'</span>
+</code></pre>
+  </div>
+</div>
+
+<h2 id="writing-posts-with-jupyter-notebooks">Writing posts with Jupyter notebooks</h2>
+<p>To use Jupyter notebooks as posts, we’ll use <a href="http://docs.getpelican.com/en/stable/plugins.html">plugins</a>, a way to easily extend the functionality of your Pelican webpage. An official repository of plugins is maintained <a href="https://github.com/getpelican/pelican-plugins">here</a>. We’ll be using the <a href="https://github.com/danielfrg/pelican-ipynb">pelican-ipynb</a> which at the time of this writing has not yet been incorporated into the official plugin repository.</p>
+
+<p>Following <a href="http://cyrille.rossant.net/pelican-github/">this approach by Cyrille Rossant</a>, we’re going to have a directory for custom plugins(i.e. not in the official repo), <code class="highlighter-rouge">plugins/</code>, and a directory with all of the official plugins, <code class="highlighter-rouge">pelican-plugins</code>. The latter can be added as a submodule. You can off course pick-and-choose which plugins you want and just copy and paste those into a single directory if you want.</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span>mkdir plugins
+<span class="nv">$ </span>git submodule add https://github.com/getpelican/pelican-plugins.git
+</code></pre>
+  </div>
+</div>
+
+<p>We need to tell Pelican where to look for these plugins and which ones we’ll be using. pelican-ipynb depends on <a href="https://github.com/getpelican/pelican-plugins/tree/master/liquid_tags">Jake Vanderplas’s liquid_tags plugin</a> (included in <code class="highlighter-rouge">pelican-plugins</code>) so we’ll need to point to that one too. In <code class="highlighter-rouge">pelicanconf.py</code>:</p>
+
+<div class="language-python highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="n">PLUGIN_PATHS</span><span class="o">=</span><span class="p">[</span><span class="s">'pelican-plugins'</span><span class="p">,</span><span class="s">'plugins'</span><span class="p">]</span>
+<span class="n">PLUGINS</span><span class="o">=</span><span class="p">[</span><span class="s">'liquid_tags.notebook'</span><span class="p">,</span><span class="s">'ipynb.liquid'</span><span class="p">,]</span>
+</code></pre>
+  </div>
+</div>
+
+<p>Follwing the <a href="https://github.com/danielfrg/pelican-ipynb">pelican-ipynb installation guide</a>, I’ve opted for “Mode B: Liquid Tags”. This will essentially allow us to inject notebook content straight into a normal <code class="highlighter-rouge">.md</code> file. First, create a directory to store the notebooks,</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="nv">$ </span>mkdir content/notebooks
+</code></pre>
+  </div>
+</div>
+
+<p>and add a notebook to this new directory (e.g. <code class="highlighter-rouge">contents/notebooks/my_test_notebook.ipynb</code>). Then tell Pelican to preserve the path to this directory so that we can pull content from it. In <code class="highlighter-rouge">pelicanconf.py</code>:</p>
+
+<div class="language-python highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="n">STATIC</span><span class="o">=</span><span class="p">[</span><span class="s">'notebooks'</span><span class="p">]</span>
+</code></pre>
+  </div>
+</div>
+
+<p>Finally, we can add this as a blog entry by injecting into a normal Markdown blog entry, <code class="highlighter-rouge">contents/hello_jupyter.md</code>:</p>
+
+<div class="highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code>Title: Hello Pelican with Jupyter!
+Date: 2016-04-03 0:54
+Category: Pelican
+Tags: pelican, python, jupyter
+slug:hello-jupyter
+Authors: Foo Bar
+Summary: This blog post was written in a Jupyter notebook. It can be included in a post using a liquid tag.
+
+
+{% notebook notebooks/my_test_notebook.ipynb %}
+
+</code></pre>
+  </div>
+</div>
+
+<p>This post should now be available on your main blog roll and the content should all be rendered from your Jupyter notebook, figures, LaTeX, Markdown, and all!</p>
+
+<h2 id="automatic-builds-with-travis-ci">Automatic Builds with Travis CI</h2>
+<p>Now we want to publish our site with GitHub Pages. By default, any content on the <code class="highlighter-rouge">master</code> branch of your repo will be available at <code class="highlighter-rouge">&lt;username&gt;.github.io</code>. Every time we edit our content on the <code class="highlighter-rouge">sources</code> branch and push it to GitHub, we would like these changes to be reflected on our actual site.
+A continuous integration service like <a href="https://travis-ci.org/">Travis CI</a> allows you to leverage GitHub’s web hooks to trigger builds of your website at each commit to <code class="highlighter-rouge">sources</code>.</p>
+
+<p>Login to Travis CI with your GitHub username and enable your <code class="highlighter-rouge">&lt;username&gt;.github.io</code> repository. Then we need to provide a <code class="highlighter-rouge">.travis.yml</code> configuration file to tell Travis what to do at each commit. The <code class="highlighter-rouge">.travis.yml</code> for this blog looks like:</p>
+
+<div class="language-yaml highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="na">language</span><span class="pi">:</span> <span class="s">python</span>
+<span class="na">python</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s1">'</span><span class="s">2.7'</span>
+<span class="na">sudo</span><span class="pi">:</span> <span class="s">required</span>
+<span class="na">branches</span><span class="pi">:</span>
+  <span class="na">only</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">sources</span>
+<span class="na">install</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s">pip install -r requirements.txt</span>
+<span class="na">script</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s">make publish github</span>
+<span class="na">env</span><span class="pi">:</span>
+  <span class="na">global</span><span class="pi">:</span>
+    <span class="na">secure</span><span class="pi">:</span> <span class="s">xxxxxxxxx</span>
+</code></pre>
+  </div>
+</div>
+
+<p>This tells Travis that we’re using Python, version 2.7, that we only want to trigger builds when pushing to the <code class="highlighter-rouge">sources</code> branch, to install every package in our <code class="highlighter-rouge">requirements.txt</code> file, and to run the <code class="highlighter-rouge">make</code> with the <code class="highlighter-rouge">publish github</code> option. This will use <code class="highlighter-rouge">ghp-import</code> to put a copy of everything in <code class="highlighter-rouge">output/</code> on <code class="highlighter-rouge">master</code> and then do a force push to <code class="highlighter-rouge">master</code></p>
+
+<p>This last line contains a key that will allow Travis to do a force push to the <code class="highlighter-rouge">master</code> branch. Generate using <a href="http://blog.mathieu-leplatre.info/publish-your-pelican-blog-on-github-pages-via-travis-ci.html">the instructions listed here</a>. Finally, in order to give Travis all the permissions it needs for the force push, replace the second line in the <code class="highlighter-rouge">github: publish</code> block of <code class="highlighter-rouge">Makefile</code> with:</p>
+
+<div class="language-bash highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code>@git push <span class="nt">-fq</span> https://<span class="k">${</span><span class="nv">GH_TOKEN</span><span class="k">}</span>@github.com/<span class="k">${</span><span class="nv">TRAVIS_REPO_SLUG</span><span class="k">}</span> <span class="k">$(</span>GITHUB_PAGES_BRANCH<span class="k">)</span>
+</code></pre>
+  </div>
+</div>
+<p>The <code class="highlighter-rouge">@</code> symbol in front of this line in the Makefile and the <code class="highlighter-rouge">-q</code> flag suppress all output related to this step in the build. Not doing so will result in your <code class="highlighter-rouge">GH_TOKEN</code>, which we’ve gone to the trouble of encrypting, being published to your public Travis build logs.</p>
+
+<p>That’s pretty much it. Author some posts, add a theme and push to the <code class="highlighter-rouge">sources</code> branch and Travis and GitHub should take care of the rest. You can see any errors that get thrown by going to your Travis CI homepage. For a complete working example, <a href="https://github.com/wtbarnes/wtbarnes.github.io/tree/sources">check out the source for this site on my GitHub page.</a></p>
+
+<h2 id="other-great-resources">Other Great Resources</h2>
+
+<p>Without the plethora of blogs and tutorials on Pelican, GitHub, and Travis that already exist, setting up this blog would have been <strong>much</strong> more difficult (read <em>impossible</em>). Here are some resources that I found really helpful while putting this all together:</p>
+
+<ul>
+  <li><a href="http://cyrille.rossant.net/pelican-github/">Setting up a blog with Pelican and GitHub Pages, Cyrille Rossant</a></li>
+  <li><a href="https://pages.github.com/">GitHub Pages</a></li>
+  <li><a href="http://blog.mathieu-leplatre.info/publish-your-pelican-blog-on-github-pages-via-travis-ci.html">Publish your Pelican blog on Github pages via Travis-CI, Mathieu Leplatre</a></li>
+  <li><a href="http://docs.getpelican.com/en/3.6.3/">Pelican Docs</a></li>
+  <li><a href="http://www.pelicanthemes.com/">Many examples of Pelican Themes</a></li>
+  <li><a href="http://danielfrg.com/blog/2013/02/16/blogging-pelican-ipython-notebook/">Blogging with IPython notebooks in pelican, Daniel Rodriguez</a></li>
+</ul>
+
+        </div>
+        <div class="footer fixed-bottom">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-7 col-lg-6 text-xs-center text-sm-center text-md-left text-lg-left">
+                <!-- Copyright and credit -->
+                <p><a href="https://github.com/wtbarnes/wtbarnes.github.io">&copy; 2017 Will Barnes</a> / Built with <a href="https://jekyllrb.com/">Jekyll</a> / Designed with <a href="https://getbootstrap.com/">Bootstrap</a></p>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-5 col-lg-6 text-xs-center text-sm-center text-md-right text-lg-right">
+                <!-- Social links -->
+                <a href="https://github.com/wtbarnes"><i class="fa fa-github fa-2x"></i></a>
+                <a href="https://twitter.com/wtbarnes_"><i class="fa fa-twitter fa-2x"></i></a>
+                <a href="https://stackoverflow.com/users/4717663/will-barnes"><i class="fa fa-stack-overflow fa-2x"></i></a>
+                <a href="mailto:will.t.barnes@gmail.com"><i class="fa fa-envelope fa-2x"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+</html>
