@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+<title>Will Barnes: Building a CV in LaTeX and Markdown with Jinja2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/custom.css">
+<!-- Enable different syntax highlighting styles here -->
+<!-- <link rel="stylesheet" href="/css/rouge.base16.syntax.css"> -->
+<link rel="stylesheet" href="/css/rouge.github.syntax.css">
+<!-- Favicon -->
+<link rel="shortcut icon" href="/images/favicon.png">
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+<script src="https://use.fontawesome.com/fae2893fed.js"></script>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid">
+    <a class="navbar-brand" href="https://wtbarnes.github.io/">
+        <i class="fa fa-sun-o fa-3x"></i>
+        <i class="fa fa-plus fa-1x"></i>
+        <i class="fa fa-code fa-3x"></i> 
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link h5 " href="https://wtbarnes.github.io/">Home</a>
+            </li>
+            
+            
+            
+                     
+            <li class="nav-item">
+                <a class="nav-link h5 " href="/Blog/">Blog</a>
+            </li>
+            
+            
+                     
+            <li class="nav-item">
+                <a class="nav-link h5 " href="/CV/">CV</a>
+            </li>
+            
+            
+            
+            
+                     
+            <li class="nav-item">
+                <a class="nav-link h5 " href="/Projects/">Projects</a>
+            </li>
+            
+            
+        </ul>
+    </div>
+    </div>
+</nav>
+        <div class="container">
+            <h1>Building a CV in LaTeX and Markdown with Jinja2</h1>
+<h5 class="text-muted">August 28, 2016</h5>
+<p>For a while now, I’ve built my CV in LaTeX using the <a href="https://www.ctan.org/tex-archive/macros/latex/contrib/moderncv/?lang=en">moderncv class</a> and been reasonably happy with the product. When it came time to build this webpage, I wanted to be able to display my CV with HTML/Markdown (i.e. not just link to a PDF copy) and also concurrently maintain a PDF copy using the same <code class="highlighter-rouge">moderncv</code> format as my old static PDF copy.  I wanted to avoid having to maintain two separate versions (one Markdown and one LaTeX) given that I have enough trouble keeping one copy up to date.</p>
+
+<p>I am of course far from the first to encounter this problem. <a href="https://mszep.github.io/pandoc_resume/">Many</a>, <a href="http://blm.io/blog/markdown-academic-cv/">many</a>, <a href="https://www.chainsawonatireswing.com/2013/05/28/how-i-create-manage-my-cv-using-markdown-pandoc//?from=@">many</a> others have come up with solutions to this dilemma, most of them relying on styling with CSS/HTML combined with the powerful document converter <a href="http://pandoc.org/">pandoc</a>. What I wanted was a bit simpler: some Markdown text to inject into a page on this site as well as a moderncv-styled TeX file from which I could build a PDF.</p>
+
+<h2 id="yaml-configuration-files">YAML Configuration files</h2>
+<p>I already had my TeX file so my first thought was just to parse this and build the Markdown version from that. <a href="http://plastex.sourceforge.net/plastex/sect0025.html">Unfortunately, there aren’t that many tools for parsing TeX files in Python.</a> Rather than trying to pull the information from the TeX file, I decided it would be better to have the data structured from the beginning. After that, it is just a matter of reshaping the data into the desired format.</p>
+
+<p>The <a href="http://yaml.org/">YAML</a> standard is often used for writing configuration files (a la <a href="https://travis-ci.org/">Travis CI</a> and <a href="https://readthedocs.org/">Read the Docs</a>), but most importantly it is <a href="http://pyyaml.org/wiki/PyYAMLDocumentation">easily parsed with Python via the PyYAML package</a> straight into a Python dictionary. For example, the following YAML snippet shows the section detailing my computing skills,</p>
+
+<div class="language-yaml highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="na">sections</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">title</span><span class="pi">:</span> <span class="s">Computing Skills</span>
+    <span class="na">cvitems</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Languages</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s">C/C++, IDL, Mathematica, MATLAB, Python</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Software Tools</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s">git/GitHub, LaTeX, SLURM, TORQUE</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Operating Systems</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s">Linux, Mac OS X</span>
+</code></pre>
+  </div>
+</div>
+
+<p>Then, to read this in with Python, assuming this is stored in the file <code class="highlighter-rouge">cv_data.yml</code>,</p>
+
+<div class="language-python highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">yaml</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'cv_data.yml'</span><span class="p">,</span><span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">cv_data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cv_data</span><span class="p">[</span><span class="s">'sections'</span><span class="p">]</span>
+<span class="p">{</span><span class="s">'cvitems'</span><span class="p">:</span> <span class="p">[{</span><span class="s">'name'</span><span class="p">:</span> <span class="s">'Languages'</span><span class="p">,</span>
+<span class="s">'value'</span><span class="p">:</span> <span class="s">'C/C++, IDL, Mathematica, MATLAB, Python'</span><span class="p">},</span>
+<span class="p">{</span><span class="s">'name'</span><span class="p">:</span> <span class="s">'Software Tools'</span><span class="p">,</span> <span class="s">'value'</span><span class="p">:</span> <span class="s">'git/GitHub, LaTeX, SLURM, TORQUE'</span><span class="p">},</span>
+<span class="p">{</span><span class="s">'name'</span><span class="p">:</span> <span class="s">'Operating Systems'</span><span class="p">,</span> <span class="s">'value'</span><span class="p">:</span> <span class="s">'Linux, Mac OS X'</span><span class="p">}],</span>
+<span class="s">'title'</span><span class="p">:</span> <span class="s">'Computing Skills'</span><span class="p">}</span>
+</code></pre>
+  </div>
+</div>
+
+<p>The <code class="highlighter-rouge">title</code> field gives the name of the section; <code class="highlighter-rouge">cvitems</code> is the designation for the kind of <code class="highlighter-rouge">moderncv</code> list to be used in the TeX file generation stage. Now that we have all of the data we need in a structured format, how do we build the documents that we want?</p>
+
+<h2 id="jinja2-templates">Jinja2 Templates</h2>
+<p><a href="http://jinja.pocoo.org/docs/dev/">Jinja2</a> is a Python-based template engine, perhaps most known for its use in the micro web application framework <a href="http://flask.pocoo.org/docs/0.10/">Flask</a>. <a href="http://blog.getpelican.com/">Pelican</a>, the blogging engine used to build this site, is also built on top of Jinja2. Unsurprisingly, Jinja2 is used primarily as an HTML templating language. However, it is really general enough to be used as a template for <em>any</em> document, including TeX and Markdown.</p>
+
+<p>The basic idea behind Jinja2 templates is simple. First, write a template for the document you want to generate. As an example, let’s write a Markdown template, <code class="highlighter-rouge">jinja_md_template.md</code>, for the section that we loaded from the YAML file (<a href="http://jinja.pocoo.org/docs/dev/">see the docs for more info</a>):</p>
+
+<pre><code class="language-Markdown">
+## {{ section.title }}
+{% for item in section.cvitems %}
+* __{{ item.name }}:__ {{ item.value }}
+{% endfor %}
+
+</code></pre>
+
+<p>Next, we need to register this template with Jinja and pass in the dictionary with the relevant info:</p>
+
+<div class="language-python highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">jinja2</span> <span class="kn">import</span> <span class="n">Environment</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'jinja_md_template.md'</span><span class="p">,</span><span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+      <span class="n">md_template</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">md_environment</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">()</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">md_template</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">md_environment</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="n">cv_data</span><span class="p">[</span><span class="s">'sections'</span><span class="p">]))</span>
+</code></pre>
+  </div>
+</div>
+
+<pre><code class="language-Markdown">## Computing Skills
+
+* __Languages:__ C/C++, IDL, Mathematica, MATLAB, Python
+* __Software Tools:__ git/GitHub, LaTeX, SLURM, TORQUE
+* __Operating Systems:__ Linux, Mac OS X
+</code></pre>
+
+<p>Doing this with Markdown is very straightforward. Producing the TeX file in a similar fashion is a bit more tricky. The main reason for this is that the typical Jinja2 delimiters <code class="highlighter-rouge">{}</code> conflict with the oft-used curly braces in LaTeX.</p>
+
+<p>The solution to this problem is detailed in this <a href="http://flask.pocoo.org/snippets/55/">Flask Snippet</a> and it simply boils down to creating a new TeX Jinja2 environment and replacing the typical <code class="highlighter-rouge">{}</code> delimiters with <code class="highlighter-rouge">((()))</code>. The equivalent computing section from above looks like,</p>
+
+<div class="language-latex highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="k">\section</span><span class="p">{</span>((( section.title )))<span class="p">}</span>
+((= Simple lists with two entries =))
+((* for item in section.cvitems *))
+<span class="k">\cvitem</span><span class="p">{</span>((( item.name|escape<span class="p">_</span>tex )))<span class="p">}{</span>((( item.value|escape<span class="p">_</span>tex )))<span class="p">}</span>
+((* endfor *))
+</code></pre>
+  </div>
+</div>
+
+<p>Note that the parts of the data structure are passed through a <a href="http://jinja.pocoo.org/docs/dev/templates/#filters">filter</a> <code class="highlighter-rouge">escape_tex</code> which escapes any TeX characters (e.g. <code class="highlighter-rouge">~,\</code>) appropriately. You can see my complete TeX Jinja2 template <a href="https://github.com/wtbarnes/resume/blob/master/templates/cv_template.tex">here</a>.</p>
+
+<h2 id="putting-it-together">Putting it Together</h2>
+<p>Now that we have our TeX and markdown templates, it is just a matter of passing the CV information data structure to the templates and printing it as a file. As one possible example, <a href="https://github.com/wtbarnes/resume/blob/master/build_cv.py">see my solution</a> that prints both a markdown and TeX version and implements the appropriate filters for both. You will of course want to adjust it for your own needs.</p>
+
+<p>The biggest advantage of this method is that we now have a complete separation between the <em>content</em> of our CV (in the YAML) and the <em>layout</em> (as contained in the Jinja2 templates). This is a powerful approach because we can now have multiple versions of our CV, all with different layouts, and yet only update the content once. For example, say I wanted to maintain both an extended academic-style CV, but I also needed a more single-page resume for an industry job I’m applying to. This is now just a task of writing two templates instead of maintaining two separate documents.</p>
+
+<p>Note that markdown and TeX are just a few examples of the formats we could use. If you wanted a great deal more control over the style of your resume, you might consider doing the layout in HTML, the styling in CSS, and converting to PDF with pandoc (if needed).</p>
+
+<h2 id="bonus-updates-with-travis-ci">Bonus: Updates with Travis CI</h2>
+<p>As I mentioned earlier, I wanted to have a more extended PDF version of my CV and also include a shorter <a href="{filename}/pages/cv.md">markdown version</a> on this webpage. Given the YAML/templating approach that I use, why not let Travis CI generate the markdown, TeX, and PDF files on the fly? To do this, I added my <a href="https://github.com/wtbarnes/resume">resume repo</a> as a submodule for this site. I then added the following lines to my <code class="highlighter-rouge">.travis.yml</code> file,</p>
+
+<div class="language-yaml highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="na">before_install</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s">mkdir -p $HOME/texlive &amp;&amp; curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive</span>
+<span class="na">install</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s">PATH=$HOME/texlive/bin/x86_64-linux:$PATH</span>
+<span class="na">before_script</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s">python resume/build_cv.py --md_out_file content/pages/cv.md --pdf_link {filename}/files/cv.pdf</span>
+<span class="pi">-</span> <span class="s">pdflatex -output-directory=resume/output/ -aux-directory=resume/output/ resume/output/cv.tex</span>
+<span class="pi">-</span> <span class="s">mkdir content/files</span>
+<span class="pi">-</span> <span class="s">cp resume/output/cv.pdf content/files/</span>
+</code></pre>
+  </div>
+</div>
+
+<p>The TeXLive blob is kindly provided by user <a href="https://github.com/urdh/texlive-blob">urdh in this repo</a>. You can also install TeX via <code class="highlighter-rouge">apt-get</code>, but there are <a href="http://tex.stackexchange.com/questions/134365/installation-of-texlive-full-on-ubuntu-12-04">known issues</a> as far as getting the latest version and the needed packages. You’ll also need to add the <code class="highlighter-rouge">files</code> directory (or wherever you want to put your PDF) to <code class="highlighter-rouge">STATIC_PATHS</code> in your <code class="highlighter-rouge">pelicanconf.py</code> file,</p>
+
+<div class="language-python highlighter-rouge">
+  <div class="highlight">
+    <pre class="highlight"><code><span class="n">STATIC_PATHS</span><span class="o">=</span><span class="p">[</span><span class="s">'images'</span><span class="p">,</span><span class="s">'notebooks'</span><span class="p">,</span><span class="s">'files'</span><span class="p">]</span>
+</code></pre>
+  </div>
+</div>
+
+<p><a href="http://docs.getpelican.com/en/3.6.3/content.html#linking-to-internal-content">Linking</a> to your PDF from some page on your site is now simple. See <a href="https://wtbarnes.github.io//CV">my example</a>.</p>
+
+<p>You can of course find the full source for <a href="https://github.com/wtbarnes/wtbarnes.github.io/tree/sources">this webpage</a> and my <a href="https://github.com/wtbarnes/resume">resume</a> on GitHub.</p>
+
+<h2 id="resources">Resources</h2>
+<p>Here are some great resources for building a CV in many different formats. I found many of these quite helpful while coming up with my own solution and writing this post.</p>
+
+<ul>
+  <li><a href="http://www.prat0318.com/json_resume/">Json Resume-Generate pretty HTML, LaTeX, markdown versions from a single JSON format</a></li>
+  <li><a href="https://mszep.github.io/pandoc_resume/">Pandoc Resume</a></li>
+  <li><a href="http://blm.io/blog/markdown-academic-cv/">Writing an Academic CV in Markdown</a></li>
+  <li><a href="https://www.chainsawonatireswing.com/2013/05/28/how-i-create-manage-my-cv-using-markdown-pandoc//?from=@">Managing a CV with Markdown and pandoc</a></li>
+</ul>
+
+        </div>
+        <div class="footer fixed-bottom">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-7 col-lg-6 text-xs-center text-sm-center text-md-left text-lg-left">
+                <!-- Copyright and credit -->
+                <p><a href="https://github.com/wtbarnes/wtbarnes.github.io">&copy; 2017 Will Barnes</a> / Built with <a href="https://jekyllrb.com/">Jekyll</a> / Designed with <a href="https://getbootstrap.com/">Bootstrap</a></p>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-5 col-lg-6 text-xs-center text-sm-center text-md-right text-lg-right">
+                <!-- Social links -->
+                <a href="https://github.com/wtbarnes"><i class="fa fa-github fa-2x"></i></a>
+                <a href="https://twitter.com/wtbarnes_"><i class="fa fa-twitter fa-2x"></i></a>
+                <a href="https://stackoverflow.com/users/4717663/will-barnes"><i class="fa fa-stack-overflow fa-2x"></i></a>
+                <a href="mailto:will.t.barnes@gmail.com"><i class="fa fa-envelope fa-2x"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+    </body>
+</html>

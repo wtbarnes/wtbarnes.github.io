@@ -1,0 +1,48 @@
+body {
+  padding-top: 20px;
+  padding-bottom: 80px;
+}
+
+/* Navigation Bar */
+.navbar {
+  padding-bottom: 20px;
+}
+
+.navbar-brand i {
+  padding-right: 5px;
+  vertical-align:middle;
+}
+
+/* Footer */
+.footer {
+    /*position: absolute;*/
+    bottom: 0;
+    width: 100%;
+    height: auto;/*65px; /* Set the fixed height of the footer here */
+    line-height: 40px; /* Vertically center the text there */
+    background-color: #f5f5f5;
+    padding-bottom: 5px;
+  }
+
+.footer i {
+  padding-right: 10px;
+  vertical-align: middle;      
+}
+
+/* Projects */
+.card-header i {
+  padding-left: 5px;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  .footer .text-xs-center {
+    text-align: center;
+  } 
+}
+
+@media (max-width: 991px) {
+  body {
+    padding-bottom: 160px;
+  }
+}
