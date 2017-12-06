@@ -6,6 +6,7 @@
   - title: hissw
     description: Include and execute SSW IDL code in Python, e.g. in Jupyter notebooks, via code generation with Jinja.
     github: "https://github.com/wtbarnes/hissw"
+    docs: "https://wtbarnes.github.io/hissw/"
   - title: synthesizAR
     description: Modular framework for forward-modeling emission from solar active regions. Time-dependent models of active regions with arbitrary geometry can be built up using any field-aligned hydrodynamic code. This project comprises the bulk of my PhD thesis.
     github: "https://github.com/wtbarnes/synthesizAR"
