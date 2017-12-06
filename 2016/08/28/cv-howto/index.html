@@ -75,9 +75,7 @@
 
 <p>The <a href="http://yaml.org/">YAML</a> standard is often used for writing configuration files (a la <a href="https://travis-ci.org/">Travis CI</a> and <a href="https://readthedocs.org/">Read the Docs</a>), but most importantly it is <a href="http://pyyaml.org/wiki/PyYAMLDocumentation">easily parsed with Python via the PyYAML package</a> straight into a Python dictionary. For example, the following YAML snippet shows the section detailing my computing skills,</p>
 
-<div class="language-yaml highlighter-rouge">
-  <div class="highlight">
-    <pre class="highlight"><code><span class="na">sections</span><span class="pi">:</span>
+<div class="highlighter-rouge"><span class="na">sections</span><span class="pi">:</span>
   <span class="pi">-</span> <span class="na">title</span><span class="pi">:</span> <span class="s">Computing Skills</span>
     <span class="na">cvitems</span><span class="pi">:</span>
     <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Languages</span>
@@ -86,15 +84,11 @@
       <span class="na">value</span><span class="pi">:</span> <span class="s">git/GitHub, LaTeX, SLURM, TORQUE</span>
     <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Operating Systems</span>
       <span class="na">value</span><span class="pi">:</span> <span class="s">Linux, Mac OS X</span>
-</code></pre>
-  </div>
 </div>
 
 <p>Then, to read this in with Python, assuming this is stored in the file <code class="highlighter-rouge">cv_data.yml</code>,</p>
 
-<div class="language-python highlighter-rouge">
-  <div class="highlight">
-    <pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">yaml</span>
+<div class="highlighter-rouge"><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">yaml</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'cv_data.yml'</span><span class="p">,</span><span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">cv_data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">cv_data</span><span class="p">[</span><span class="s">'sections'</span><span class="p">]</span>
@@ -103,8 +97,6 @@
 <span class="p">{</span><span class="s">'name'</span><span class="p">:</span> <span class="s">'Software Tools'</span><span class="p">,</span> <span class="s">'value'</span><span class="p">:</span> <span class="s">'git/GitHub, LaTeX, SLURM, TORQUE'</span><span class="p">},</span>
 <span class="p">{</span><span class="s">'name'</span><span class="p">:</span> <span class="s">'Operating Systems'</span><span class="p">,</span> <span class="s">'value'</span><span class="p">:</span> <span class="s">'Linux, Mac OS X'</span><span class="p">}],</span>
 <span class="s">'title'</span><span class="p">:</span> <span class="s">'Computing Skills'</span><span class="p">}</span>
-</code></pre>
-  </div>
 </div>
 
 <p>The <code class="highlighter-rouge">title</code> field gives the name of the section; <code class="highlighter-rouge">cvitems</code> is the designation for the kind of <code class="highlighter-rouge">moderncv</code> list to be used in the TeX file generation stage. Now that we have all of the data we need in a structured format, how do we build the documents that we want?</p>
@@ -114,25 +106,21 @@
 
 <p>The basic idea behind Jinja2 templates is simple. First, write a template for the document you want to generate. As an example, let’s write a Markdown template, <code class="highlighter-rouge">jinja_md_template.md</code>, for the section that we loaded from the YAML file (<a href="http://jinja.pocoo.org/docs/dev/">see the docs for more info</a>):</p>
 
-<pre><code class="language-Markdown">
+<pre><code class="language-Markdown">{% raw %}
 ## {{ section.title }}
 {% for item in section.cvitems %}
 * __{{ item.name }}:__ {{ item.value }}
 {% endfor %}
-
+{% endraw %}
 </code></pre>
 
 <p>Next, we need to register this template with Jinja and pass in the dictionary with the relevant info:</p>
 
-<div class="language-python highlighter-rouge">
-  <div class="highlight">
-    <pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">jinja2</span> <span class="kn">import</span> <span class="n">Environment</span>
+<div class="highlighter-rouge"><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">jinja2</span> <span class="kn">import</span> <span class="n">Environment</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">'jinja_md_template.md'</span><span class="p">,</span><span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
       <span class="n">md_template</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">md_environment</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">()</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">md_template</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">md_environment</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">section</span><span class="o">=</span><span class="n">cv_data</span><span class="p">[</span><span class="s">'sections'</span><span class="p">]))</span>
-</code></pre>
-  </div>
 </div>
 
 <pre><code class="language-Markdown">## Computing Skills
@@ -146,15 +134,11 @@
 
 <p>The solution to this problem is detailed in this <a href="http://flask.pocoo.org/snippets/55/">Flask Snippet</a> and it simply boils down to creating a new TeX Jinja2 environment and replacing the typical <code class="highlighter-rouge">{}</code> delimiters with <code class="highlighter-rouge">((()))</code>. The equivalent computing section from above looks like,</p>
 
-<div class="language-latex highlighter-rouge">
-  <div class="highlight">
-    <pre class="highlight"><code><span class="k">\section</span><span class="p">{</span>((( section.title )))<span class="p">}</span>
+<div class="highlighter-rouge"><span class="k">\section</span><span class="p">{</span>((( section.title )))<span class="p">}</span>
 ((= Simple lists with two entries =))
 ((* for item in section.cvitems *))
 <span class="k">\cvitem</span><span class="p">{</span>((( item.name|escape<span class="p">_</span>tex )))<span class="p">}{</span>((( item.value|escape<span class="p">_</span>tex )))<span class="p">}</span>
 ((* endfor *))
-</code></pre>
-  </div>
 </div>
 
 <p>Note that the parts of the data structure are passed through a <a href="http://jinja.pocoo.org/docs/dev/templates/#filters">filter</a> <code class="highlighter-rouge">escape_tex</code> which escapes any TeX characters (e.g. <code class="highlighter-rouge">~,\</code>) appropriately. You can see my complete TeX Jinja2 template <a href="https://github.com/wtbarnes/resume/blob/master/templates/cv_template.tex">here</a>.</p>
@@ -169,9 +153,7 @@
 <h2 id="bonus-updates-with-travis-ci">Bonus: Updates with Travis CI</h2>
 <p>As I mentioned earlier, I wanted to have a more extended PDF version of my CV and also include a shorter <a href="{filename}/pages/cv.md">markdown version</a> on this webpage. Given the YAML/templating approach that I use, why not let Travis CI generate the markdown, TeX, and PDF files on the fly? To do this, I added my <a href="https://github.com/wtbarnes/resume">resume repo</a> as a submodule for this site. I then added the following lines to my <code class="highlighter-rouge">.travis.yml</code> file,</p>
 
-<div class="language-yaml highlighter-rouge">
-  <div class="highlight">
-    <pre class="highlight"><code><span class="na">before_install</span><span class="pi">:</span>
+<div class="highlighter-rouge"><span class="na">before_install</span><span class="pi">:</span>
 <span class="pi">-</span> <span class="s">mkdir -p $HOME/texlive &amp;&amp; curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive</span>
 <span class="na">install</span><span class="pi">:</span>
 <span class="pi">-</span> <span class="s">PATH=$HOME/texlive/bin/x86_64-linux:$PATH</span>
@@ -180,20 +162,14 @@
 <span class="pi">-</span> <span class="s">pdflatex -output-directory=resume/output/ -aux-directory=resume/output/ resume/output/cv.tex</span>
 <span class="pi">-</span> <span class="s">mkdir content/files</span>
 <span class="pi">-</span> <span class="s">cp resume/output/cv.pdf content/files/</span>
-</code></pre>
-  </div>
 </div>
 
 <p>The TeXLive blob is kindly provided by user <a href="https://github.com/urdh/texlive-blob">urdh in this repo</a>. You can also install TeX via <code class="highlighter-rouge">apt-get</code>, but there are <a href="http://tex.stackexchange.com/questions/134365/installation-of-texlive-full-on-ubuntu-12-04">known issues</a> as far as getting the latest version and the needed packages. You’ll also need to add the <code class="highlighter-rouge">files</code> directory (or wherever you want to put your PDF) to <code class="highlighter-rouge">STATIC_PATHS</code> in your <code class="highlighter-rouge">pelicanconf.py</code> file,</p>
 
-<div class="language-python highlighter-rouge">
-  <div class="highlight">
-    <pre class="highlight"><code><span class="n">STATIC_PATHS</span><span class="o">=</span><span class="p">[</span><span class="s">'images'</span><span class="p">,</span><span class="s">'notebooks'</span><span class="p">,</span><span class="s">'files'</span><span class="p">]</span>
-</code></pre>
-  </div>
+<div class="highlighter-rouge"><span class="n">STATIC_PATHS</span><span class="o">=</span><span class="p">[</span><span class="s">'images'</span><span class="p">,</span><span class="s">'notebooks'</span><span class="p">,</span><span class="s">'files'</span><span class="p">]</span>
 </div>
 
-<p><a href="http://docs.getpelican.com/en/3.6.3/content.html#linking-to-internal-content">Linking</a> to your PDF from some page on your site is now simple. See <a href="https://wtbarnes.github.io//CV">my example</a>.</p>
+<p><a href="http://docs.getpelican.com/en/3.6.3/content.html#linking-to-internal-content">Linking</a> to your PDF from some page on your site is now simple. See <a href="{{ site.url }}/CV">my example</a>.</p>
 
 <p>You can of course find the full source for <a href="https://github.com/wtbarnes/wtbarnes.github.io/tree/sources">this webpage</a> and my <a href="https://github.com/wtbarnes/resume">resume</a> on GitHub.</p>
 
