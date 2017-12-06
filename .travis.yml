@@ -1,10 +1,10 @@
+sudo: required
+dist: trusty
 language: ruby
 rvm:
 - 2.3
 python:
-- '3.6'
-sudo: required
-dist: trusty
+- 3.6
 branches:
   only:
   - sources
@@ -12,7 +12,7 @@ before_install:
 - mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive
 install:
 - PATH=$HOME/texlive/bin/x86_64-linux:$PATH
-- pip install yaml jinja2 doctr
+- sudo pip install yaml jinja2 doctr
 - gem install bundler
 - bundle install
 before_script:
