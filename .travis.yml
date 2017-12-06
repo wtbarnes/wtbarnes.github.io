@@ -3,20 +3,24 @@ dist: trusty
 language: ruby
 rvm:
 - 2.3
-python:
-- 3.6
 branches:
   only:
   - sources
+addons:
+  apt:
+    sources:
+      - jonathonf/python-3.6
+    packages:
+      - python3.6
 before_install:
 - mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive
 install:
 - PATH=$HOME/texlive/bin/x86_64-linux:$PATH
-- sudo pip install yaml jinja2 doctr
+- pip3 install PyYaml jinja2 doctr
 - gem install bundler
 - bundle install
 before_script:
-- python resume/build_cv.py --md_template cv_template.html --md_out_file _includes/cv.html --pdf_link "{{site.url}}/static_files/cv.pdf"
+- python3.6 resume/build_cv.py --md_template cv_template.html --md_out_file _includes/cv.html --pdf_link "{{site.url}}/static_files/cv.pdf"
 - pdflatex -output-directory=resume/output/ -aux-directory=resume/output/ resume/output/cv.tex
 - mkdir static_files
 - cp resume/output/cv.pdf static_files/
