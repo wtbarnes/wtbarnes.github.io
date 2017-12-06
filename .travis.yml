@@ -12,6 +12,7 @@ addons:
       - sourceline: 'ppa:jonathonf/python-3.6'
     packages:
       - python3.6
+      - python3.6-dev
 before_install:
 - mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive
 - curl https://bootstrap.pypa.io/get-pip.py | sudo python3.6
