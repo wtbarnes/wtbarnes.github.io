@@ -18,7 +18,7 @@ before_install:
 - curl https://bootstrap.pypa.io/get-pip.py | sudo python3.6
 install:
 - PATH=$HOME/texlive/bin/x86_64-linux:$PATH
-- sudo pip3.6 install PyYaml jinja2 doctr
+- sudo pip3 install PyYaml jinja2 doctr
 - gem install bundler
 - bundle install
 before_script:
