@@ -16,9 +16,10 @@ addons:
 before_install:
 - mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive
 - curl https://bootstrap.pypa.io/get-pip.py | sudo python3.6
+- pip --version
 install:
 - PATH=$HOME/texlive/bin/x86_64-linux:$PATH
-- sudo pip3 install PyYaml jinja2 doctr
+- sudo pip install PyYaml jinja2 doctr
 - gem install bundler
 - bundle install
 before_script:
