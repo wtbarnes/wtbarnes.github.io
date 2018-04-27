@@ -1,28 +1,27 @@
-sudo: required
 dist: trusty
-language: ruby
-rvm:
-- 2.3
+language: c
 branches:
   only:
   - sources
-addons:
-  apt:
-    sources:
-      - sourceline: 'ppa:jonathonf/python-3.6'
-    packages:
-      - python3.6
-      - python3.6-dev
+sudo: false
+
+env:
+  global:
+    - PYTHON_VERSION=3.6
+    - PIP_DEPENDENCIES='doctr'
+    - CONDA_CHANNELS='conda-forge'
+    - CONDA_DEPENDENCIES='ruby PyYaml jinja2'
+    - EVENT_TYPE='pull_request push'
+    - secure: "ynaTam1madBRwY/zDo7VDWk8LFxeKUjpO+K+h6fubPZbr+SN3Iiax+gK8q1sHsjzK7T0wdj2tIHEg8XVppbx1Dw7mm822Kpa3PodjkObx0PDpYB7B3yVyaj3EvpSCpi4lTmGUZR4mxN7zCpKgK1A+hxP/RX/ExxZ5WegbK9Tn5RdcWMfIcZpRf7UOuNL8WZWEo6ayqZsDGX/WeB4zKHOZfWgzYinqbcxl5HiHKzFIMIooQxbpI7ZFZgzOjSMCBkdcelOsTMjp9xiGQfr8pi9X9ExLzmfoMlBx31SMfAnqezUquu9iD8cGDzhcwvwzKIo8NjXOCzyLBxsvMFSg3ADKlP2qWAPZ3YPUpWL3EVk6hDa6U0rY/q76cJPr1RTb+8TT/LZIXD1PDBqR6WiOMZKrOQhxYlKhWlEu2OjJThZRtaCSdglEuh+V1ofHPld8J9R42XtGrAn8aA7J1hEvNvukxkf1pyGati8QgsHoq0U2UkC/M8z2gtAaJAGf96PFP/IQu0ukkcSkW/oTeXTGhbQtsmT/N1vHYcDvIMZEde1UkGdje7nmkCLqbzuk1LJe+n5/gms+VaDOEAwquOe2/PquQbwqd6/LQfnhtrLKezQKD8yS7INa1vZC6/iaY3W6TSP1uGaLT03OaaE60MmyNNldw/JCTH4RQP0+zlpEHeUepo="
+
 before_install:
 - mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20150712/texlive.tar.xz | tar -JxC $HOME/texlive
-- curl https://bootstrap.pypa.io/get-pip.py | sudo python3.6
 install:
 - PATH=$HOME/texlive/bin/x86_64-linux:$PATH
-- sudo pip3.6 install PyYaml jinja2 doctr
 - gem install bundler
 - bundle install
 before_script:
-- python3.6 resume/build_cv.py --md_template cv_template.html --md_out_file _includes/cv.html --pdf_link "{{site.url}}/static_files/cv.pdf"
+- python resume/build_cv.py --md_template cv_template.html --md_out_file _includes/cv.html --pdf_link "{{site.url}}/static_files/cv.pdf"
 - pdflatex -output-directory=resume/output/ -aux-directory=resume/output/ resume/output/cv.tex
 - mkdir static_files
 - cp resume/output/cv.pdf static_files/
@@ -30,6 +29,3 @@ script:
 - set -e
 - bundle exec jekyll build --destination www
 - doctr deploy . --built-docs www/ --deploy-branch-name master --no-require-master
-env:
-  global:
-    secure: "ynaTam1madBRwY/zDo7VDWk8LFxeKUjpO+K+h6fubPZbr+SN3Iiax+gK8q1sHsjzK7T0wdj2tIHEg8XVppbx1Dw7mm822Kpa3PodjkObx0PDpYB7B3yVyaj3EvpSCpi4lTmGUZR4mxN7zCpKgK1A+hxP/RX/ExxZ5WegbK9Tn5RdcWMfIcZpRf7UOuNL8WZWEo6ayqZsDGX/WeB4zKHOZfWgzYinqbcxl5HiHKzFIMIooQxbpI7ZFZgzOjSMCBkdcelOsTMjp9xiGQfr8pi9X9ExLzmfoMlBx31SMfAnqezUquu9iD8cGDzhcwvwzKIo8NjXOCzyLBxsvMFSg3ADKlP2qWAPZ3YPUpWL3EVk6hDa6U0rY/q76cJPr1RTb+8TT/LZIXD1PDBqR6WiOMZKrOQhxYlKhWlEu2OjJThZRtaCSdglEuh+V1ofHPld8J9R42XtGrAn8aA7J1hEvNvukxkf1pyGati8QgsHoq0U2UkC/M8z2gtAaJAGf96PFP/IQu0ukkcSkW/oTeXTGhbQtsmT/N1vHYcDvIMZEde1UkGdje7nmkCLqbzuk1LJe+n5/gms+VaDOEAwquOe2/PquQbwqd6/LQfnhtrLKezQKD8yS7INa1vZC6/iaY3W6TSP1uGaLT03OaaE60MmyNNldw/JCTH4RQP0+zlpEHeUepo="
