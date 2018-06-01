@@ -33,16 +33,16 @@ $MINICONDA_URL = "https://repo.continuum.io/miniconda/"
 
 # We will use the 2.0.x releases as "stable" for Python 2.7 and 3.4
 if ((python -c "from distutils.version import LooseVersion; import os; print(LooseVersion(os.environ['PYTHON_VERSION']) < str(3.5))") -match "False") {
-    $env:LATEST_ASTROPY_STABLE = "3.0.1"
+    $env:LATEST_ASTROPY_STABLE = "3.0.2"
 }
 else {
-    $env:LATEST_ASTROPY_STABLE = "2.0.5"
+    $env:LATEST_ASTROPY_STABLE = "2.0.6"
     $env:NO_PYTEST_ASTROPY = "True"
 }
 
-$env:ASTROPY_LTS_VERSION = "2.0.5"
+$env:ASTROPY_LTS_VERSION = "2.0.6"
 $env:LATEST_NUMPY_STABLE = "1.14"
-$env:LATEST_SUNPY_STABLE = "0.8.5"
+$env:LATEST_SUNPY_STABLE = "0.9.0"
 
 # We pin the version for conda as it's not the most stable package from
 # release to release. Add note here if version is pinned due to a bug upstream.
@@ -249,6 +249,9 @@ if ($env:SUNPY_VERSION) {
 
 # Install the specified versions of numpy and other dependencies
 if ($env:CONDA_DEPENDENCIES) {
+   if ($env:CONDA_DEPENDENCIES -match "matplotlib") {
+      $env:CONDA_DEPENDENCIES += " sip=4.18"
+   }
     $CONDA_DEPENDENCIES = $env:CONDA_DEPENDENCIES.split(" ")
 } else {
     $CONDA_DEPENDENCIES = ""

@@ -19,20 +19,20 @@ conda config --set always_yes yes --set changeps1 no
 shopt -s nocasematch
 
 if [[ -z $PYTHON_VERSION ]]; then
-    PYTHON_VERSION=$TRAVIS_PYTHON_VERSION
+    export PYTHON_VERSION=$TRAVIS_PYTHON_VERSION
 fi
 
 # We will use the 2.0.x releases as "stable" for Python 2.7 and 3.4
 if [[ $(python -c "from distutils.version import LooseVersion; import os;\
         print(LooseVersion(os.environ['PYTHON_VERSION']) < '3.5')") == False ]]; then
-    export LATEST_ASTROPY_STABLE=3.0.1
+    export LATEST_ASTROPY_STABLE=3.0.2
 else
-    export LATEST_ASTROPY_STABLE=2.0.5
+    export LATEST_ASTROPY_STABLE=2.0.6
     export NO_PYTEST_ASTROPY=True
 fi
-ASTROPY_LTS_VERSION=2.0.5
+ASTROPY_LTS_VERSION=2.0.6
 LATEST_NUMPY_STABLE=1.14
-LATEST_SUNPY_STABLE=0.8.5
+LATEST_SUNPY_STABLE=0.9.0
 
 if [[ -z $PIP_FALLBACK ]]; then
     PIP_FALLBACK=true
@@ -160,6 +160,15 @@ fi
 # Pin required versions for dependencies, howto is in FAQ of conda
 # http://conda.pydata.org/docs/faq.html#pinning-packages
 if [[ ! -z $CONDA_DEPENDENCIES ]]; then
+
+    # On the defaults conda channel mpl currently segfault with newer sip
+    # versions. While it doesn't happen for all python version, there are
+    # many packages running into the issue, so we better have a temporarily
+    # limitation for everything here.
+    if [[ ! -z $(echo $CONDA_DEPENDENCIES | grep matplotlib) ]]; then
+        CONDA_DEPENDENCIES=${CONDA_DEPENDENCIES}" sip<4.19"
+    fi
+
     echo $CONDA_DEPENDENCIES | awk '{print tolower($0)}' | tr " " "\n" | \
         sed -E -e 's|([a-z0-9]+)([=><!])|\1 \2|g' -e 's| =([0-9])| ==\1|g' >> $PIN_FILE
 
