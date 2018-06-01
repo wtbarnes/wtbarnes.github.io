@@ -30,5 +30,5 @@ script:
 - set -e
 - bundle exec jekyll build --destination www
 # Doctr gets angry if this repo is still around
-- rm -rf ci_helpers
+- rm -rf ci-helpers
 - doctr deploy . --built-docs www/ --deploy-branch-name master --no-require-master
