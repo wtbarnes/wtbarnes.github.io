@@ -1,8 +1,9 @@
-- title: Personal
+- title: Maintainer
   projects:
   - title: fiasco
     description: High-level Python interface to the CHIANTI atomic database, a commonly used source of atomic data in solar physics. Provides many common derived quantities, including ionization equilibria and emissivities.
     github: "https://github.com/wtbarnes/fiasco"
+    docs: "http://fiasco.readthedocs.io"
   - title: hissw
     description: Include and execute SSW IDL code in Python, e.g. in Jupyter notebooks, via code generation with Jinja.
     github: "https://github.com/wtbarnes/hissw"
@@ -10,17 +11,26 @@
   - title: synthesizAR
     description: Modular framework for forward-modeling emission from solar active regions. Time-dependent models of active regions with arbitrary geometry can be built up using any field-aligned hydrodynamic code. This project comprises the bulk of my PhD thesis.
     github: "https://github.com/wtbarnes/synthesizAR"
-- title: Contributing
+    docs: "http://synthesizar.readthedocs.io"
+  - title: ebtel++
+    description: Efficient hydrodynamic code for modeling dynamic evolution of coronal loops. Based on the EBTEL model of [Klimchuk et al., (2008)](http://adsabs.harvard.edu/abs/2008ApJ...682.1351K). I am the primary author of ebtel++, but the code is maintained and hosted by the Solar Physics Group at Rice University.
+    github: "https://github.com/rice-solar-physics/ebtelPlusPlus"
+    docs: "http://rice-solar-physics.github.io/ebtelPlusPlus/"
+  - title: hydrad_tools
+    description: Python tools for configuring inputs to and parsing output from the [HYDRAD](http://adsabs.harvard.edu/abs/2013ApJ...770...12B) code for computing time-dependent hydrodynamic simulations of coronal loops.
+    github: "https://github.com/rice-solar-physics/hydrad_tools/"
+    docs: "https://rice-solar-physics.github.io/hydrad_tools/"
+- title: Contributor
   projects:
   - title: ChiantiPy
     description: Library for parsing the CHIANTI atomic database created by Ken Dere. I've made several major contributions to ChiantiPy, including setting up the testing framework and documentation builds as well as rewriting the continuum emission module.
     github: "https://github.com/chianti-atomic/ChiantiPy/"
     docs: "http://chiantipy.readthedocs.io"
-  - title: ebtel++
-    description: Efficient hydrodynamic code for modeling dynamic evolution of coronal loops. Based on the EBTEL model of [Klimchuk et al., (2008)](http://adsabs.harvard.edu/abs/2008ApJ...682.1351K). I am the primary author of ebtel++, but the code is maintained and hosted by the Solar Physics Group at Rice University.
-    github: "https://github.com/rice-solar-physics/ebtelPlusPlus"
-    docs: "http://rice-solar-physics.github.io/ebtelPlusPlus/"
   - title: solarbextrapolation
-    description: Python package for extrapolating three-dimensional magnetic field models from observed magnetograms
+    description: Python package for extrapolating three-dimensional magnetic field models from observed magnetograms.
     github: "https://github.com/sunpy/solarbextrapolation" 
     docs: "http://docs.sunpy.org/projects/solarbextrapolation/en/latest/"
+  - title: SunPy
+    description: "[SunPy](http://sunpy.org/) is a community-developed, free and open-source solar data analysis environment for Python."
+    github: "https://github.com/sunpy/sunpy"
+    docs: "http://docs.sunpy.org/en/stable/"  
