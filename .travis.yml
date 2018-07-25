@@ -22,8 +22,9 @@ install:
 - gem install bundler
 - bundle install
 before_script:
-- python resume/build_cv.py --md_template cv_template.html --md_out_file _includes/cv.html --tex_template cv_template.tex --tex_out_file cv.tex --pdf_link "{{site.url}}/static_files/cv.pdf"
-- pdflatex -output-directory=resume/output/ -aux-directory=resume/output/ cv.tex
+- mkdir resume/output
+- python resume/build_cv.py --md_template cv_template.html --md_out_file _includes/cv.html --tex_template cv_template.tex --tex_out_file resume/output/cv.tex --pdf_link "{{site.url}}/static_files/cv.pdf"
+- pdflatex -output-directory=resume/output/ -aux-directory=resume/output/ resume/output/cv.tex
 - mkdir static_files
 - cp resume/output/cv.pdf static_files/
 script:
