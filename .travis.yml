@@ -20,6 +20,7 @@ install:
 - source ci-helpers/travis/setup_conda.sh
 - PATH=$HOME/texlive/bin/x86_64-linux:$PATH
 - tlmgr option repository ftp://tug.org/historic/systems/texlive/2017/tlnet-final
+- tlmgr update --self
 - tlmgr install collection-fontsrecommended
 - tlmgr install collection-fontsextra
 - gem install bundler
