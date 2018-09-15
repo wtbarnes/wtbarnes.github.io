@@ -71,6 +71,12 @@ def test_python_version():
         assert sys.version.startswith(os.environ['TRAVIS_PYTHON_VERSION'])
 
 
+def test_exported_variables():
+    if 'TRAVIS' in os.environ:
+        assert os.environ.get('ASTROPY_LTS_VERSION', '') == LATEST_ASTROPY_LTS
+        assert os.environ.get('LATEST_NUMPY_STABLE', '') == LATEST_NUMPY_STABLE
+        assert os.environ.get('LATEST_SUNPY_STABLE', '') == LATEST_SUNPY_STABLE
+
 def test_numpy():
     if 'NUMPY_VERSION' in os.environ:
         import numpy
@@ -148,6 +154,13 @@ def test_dependency_imports():
             continue
         elif package == 'pytest-cov':
             __import__('pytest_cov')
+        elif package == 'nomkl':
+            import subprocess
+            assert 'nomkl' in str(subprocess.check_output(["conda", "list"]))
+        elif package == 'mkl':
+            import subprocess
+            assert 'nomkl' not in str(subprocess.check_output(["conda", "list"]))
+            assert 'mkl' in str(subprocess.check_output(["conda", "list"]))
         elif package == '':
             continue
         else:
