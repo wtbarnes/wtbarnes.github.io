@@ -42,7 +42,7 @@ else:
     LATEST_ASTROPY_STABLE_WIN = '2.0.8'
 
 LATEST_ASTROPY_LTS = '2.0.8'
-LATEST_NUMPY_STABLE = '1.15'
+LATEST_NUMPY_STABLE = '1.15.2'
 LATEST_SUNPY_STABLE = '0.9.2'
 
 if os.environ.get('PIP_DEPENDENCIES', None) is not None:
@@ -119,6 +119,19 @@ def test_astropy():
     if LATEST_ASTROPY_STABLE.startswith('2'):
         with pytest.raises(ImportError):
             import pytest_doctestplus
+
+
+def test_mpl():
+    if 'MATPLOTLIB_VERSION' in os.environ:
+        import matplotlib
+        os_mpl_version = os.environ['MATPLOTLIB_VERSION'].lower()
+
+        # Revise when figured out the exact rule behind mpl dev versioning
+        if 'dev' in os_mpl_version:
+            assert '+' in matplotlib.__version__
+        else:
+            assert matplotlib.__version__.startswith(os_mpl_version)
+            assert '+' not in matplotlib.__version__
 
 
 def test_sunpy():
