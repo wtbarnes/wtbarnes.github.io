@@ -153,7 +153,7 @@ else {
 }
 
 $env:ASTROPY_LTS_VERSION = "2.0.9"
-$env:LATEST_NUMPY_STABLE = "1.15.2"
+$env:LATEST_NUMPY_STABLE = "1.15"
 $env:LATEST_SUNPY_STABLE = "0.9.2"
 
 # We pin the version for conda as it's not the most stable package from
@@ -301,6 +301,12 @@ Copy-Item ci-helpers\appveyor\pinned ${env:PYTHON}\envs\test\conda-meta\pinned
 
 retry_on_known_error conda install $QUIET -n test pytest pip
 checkLastExitCode
+
+# In case of older python versions there isn't an up-to-date version of pip
+# which may lead to ignore install dependencies of the package we test.
+# This update should not interfere with the rest of the functionalities
+# here.
+pip install --upgrade pip
 
 # Check whether a specific version of Numpy is required
 if ($env:NUMPY_VERSION) {

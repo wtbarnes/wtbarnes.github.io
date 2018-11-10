@@ -106,7 +106,7 @@ else
     export NO_PYTEST_ASTROPY=True
 fi
 export ASTROPY_LTS_VERSION=2.0.9
-export LATEST_NUMPY_STABLE=1.15.2
+export LATEST_NUMPY_STABLE=1.15
 export LATEST_SUNPY_STABLE=0.9.2
 
 if [[ -z $PIP_FALLBACK ]]; then
@@ -211,6 +211,14 @@ retry_on_known_error conda install -c astropy-ci-extras --no-channel-priority $Q
         mv /tmp/pin_file_temp $PIN_FILE
     fi)
 )
+
+# In case of older python versions there isn't an up-to-date version of pip
+# which may lead to ignore install dependencies of the package we test.
+# This update should not interfere with the rest of the functionalities
+# here.
+if [[ -z $PIP_VERSION ]]; then
+    pip install --upgrade pip
+fi
 
 export PIP_INSTALL='pip install'
 
@@ -489,7 +497,11 @@ if [[ $SETUP_CMD == *build_sphinx* ]] || [[ $SETUP_CMD == *build_docs* ]]; then
             echo "Installing $package with conda was unsuccessful, using pip instead."
             PIP_PACKAGE_VERSION=$(awk '{print $2}' $PIN_FILE)
             if [[ $(echo $PIP_PACKAGE_VERSION | cut -c 1) =~ $is_number ]]; then
-                PIP_PACKAGE_VERSION='=='${PIP_${package}_VERSION}
+                if [[ ${PIP_${package}_VERSION} == *">"* || ${PIP_${package}_VERSION} == *"<"* ]]; then
+                   PIP_PACKAGE_VERSION=${PIP_${package}_VERSION}
+                else
+                    PIP_PACKAGE_VERSION='=='${PIP_${package}_VERSION}
+                fi
             elif [[ $(echo $PIP_PACKAGE_VERSION | cut -c 1-2) =~ $is_eq_number ]]; then
                 PIP_PACKAGE_VERSION='='${PIP_PACKAGE_VERSION}
             fi
