@@ -19,6 +19,7 @@
 ./ci-helpers/travis/setup_conda_linux.sh
 ./ci-helpers/travis/setup_conda_osx.sh
 ./ci-helpers/travis/setup_dependencies_common.sh
+./ci-helpers/utils/import_submodules.py
 ./css/custom.css
 ./css/rouge.base16.syntax.css
 ./css/rouge.github.syntax.css

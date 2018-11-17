@@ -109,6 +109,11 @@ export ASTROPY_LTS_VERSION=2.0.9
 export LATEST_NUMPY_STABLE=1.15
 export LATEST_SUNPY_STABLE=0.9.2
 
+
+is_number='[0-9]'
+is_eq_number='=[0-9]'
+
+
 if [[ -z $PIP_FALLBACK ]]; then
     PIP_FALLBACK=true
 fi
@@ -186,15 +191,11 @@ fi
 # CORE DEPENDENCIES
 
 if [[ ! -z $PYTEST_VERSION ]]; then
-    echo "pytest ${PYTEST_VERSION}*" >> $PIN_FILE
-else
-    # pin pytest to avoid upstream issues
-    # https://github.com/astropy/pytest-doctestplus/issues/22
-    echo "pytest <3.7" >> $PIN_FILE
+    echo "pytest ${PYTEST_VERSION}.*" >> $PIN_FILE
 fi
 
 if [[ ! -z $PIP_VERSION ]]; then
-    echo "pip ${PIP_VERSION}*" >> $PIN_FILE
+    echo "pip ${PIP_VERSION}.*" >> $PIN_FILE
 fi
 
 # We use the channel astropy-ci-extras to host pytest 2.7.3 that is
@@ -280,7 +281,7 @@ if [[ ! -z $CONDA_DEPENDENCIES ]]; then
             awk '{print toupper($0)"_VERSION"}'))
         if [[ ! -z $version && ($version != dev* && $version != pre*) ]]; then
             awk -v package=$package -v version=$version \
-                '{if ($1 == package) print package" " version"*";
+                '{if ($1 == package) print package" " version".*";
                   else print $0}' \
                 $PIN_FILE > /tmp/pin_file_temp
             mv /tmp/pin_file_temp $PIN_FILE
@@ -289,7 +290,7 @@ if [[ ! -z $CONDA_DEPENDENCIES ]]; then
 
     # Do in the pin file what conda silently does on the command line, to
     # extend the underspecified version numbers with *
-    awk -F == '{if (NF==1) print $0; else print $1, $2"*"}' \
+    awk -F == '{if (NF==1) print $0; else print $1, $2".*"}' \
         $PIN_FILE > /tmp/pin_file_temp
     mv /tmp/pin_file_temp $PIN_FILE
 
@@ -365,7 +366,7 @@ if [[ ! -z $ASTROPY_VERSION ]]; then
         fi
     elif [[ $ASTROPY_VERSION == stable ]]; then
         # We add astropy to the pin file to make sure it won't get downgraded
-        echo "astropy ${LATEST_ASTROPY_STABLE}*" >> $PIN_FILE
+        echo "astropy ${LATEST_ASTROPY_STABLE}.*" >> $PIN_FILE
 
         if [[ $NO_PYTEST_ASTROPY == True ]]; then
             ASTROPY_OPTION="$LATEST_ASTROPY_STABLE"
@@ -374,18 +375,12 @@ if [[ ! -z $ASTROPY_VERSION ]]; then
         fi
 
     elif [[ $ASTROPY_VERSION == lts ]]; then
-        # We ship the build if the LTS version is the same as latest stable
-        if [[ $LATEST_ASTROPY_STABLE == ${ASTROPY_LTS_VERSION}* ]]; then
-            echo "The latest stable version of astropy is an LTS version, skipping testing as LTS"
-            travis_terminate 0
-        fi
-
         # We add astropy to the pin file to make sure it won't get updated
-        echo "astropy ${ASTROPY_LTS_VERSION}*" >> $PIN_FILE
+        echo "astropy ${ASTROPY_LTS_VERSION}.*" >> $PIN_FILE
         ASTROPY_OPTION=$ASTROPY_LTS_VERSION
     else
         # We add astropy to the pin file to make sure it won't get updated
-        echo "astropy ${ASTROPY_VERSION}*" >> $PIN_FILE
+        echo "astropy ${ASTROPY_VERSION}.*" >> $PIN_FILE
         if [[ $(echo ${ASTROPY_VERSION} | cut -b 1) -ge 3 ]]; then
             ASTROPY_OPTION="$ASTROPY_VERSION pytest-astropy"
         else
@@ -424,7 +419,7 @@ if [[ ! -z $SUNPY_VERSION ]]; then
         SUNPY_OPTION=$LATEST_SUNPY_STABLE
     else
         # We add sunpy to the pin file to make sure it won't get updated
-        echo "sunpy ${SUNPY_VERSION}*" >> $PIN_FILE
+        echo "sunpy ${SUNPY_VERSION}.*" >> $PIN_FILE
         SUNPY_OPTION=$SUNPY_VERSION
     fi
     if [[ ! -z $SUNPY_OPTION ]]; then
@@ -448,12 +443,9 @@ if [[ $SETUP_CMD == *build_sphinx* ]] || [[ $SETUP_CMD == *build_docs* ]]; then
     # there are (only need to deal with the case when they aren't listed in
     # CONDA_DEPENDENCIES, otherwise this was already dealt with)
 
-    is_number='[0-9]'
-    is_eq_number='=[0-9]'
-
     if [[ ! -z $MATPLOTLIB_VERSION ]]; then
         if [[ -z $(grep matplotlib $PIN_FILE) ]]; then
-            echo "matplotlib ${MATPLOTLIB_VERSION}*" >> $PIN_FILE
+            echo "matplotlib ${MATPLOTLIB_VERSION}.*" >> $PIN_FILE
         fi
     fi
 
@@ -475,7 +467,7 @@ if [[ $SETUP_CMD == *build_sphinx* ]] || [[ $SETUP_CMD == *build_docs* ]]; then
 
     if [[ ! -z $SPHINX_VERSION ]]; then
         if [[ -z $(grep sphinx $PIN_FILE) ]]; then
-            echo "sphinx ${SPHINX_VERSION}*" >> $PIN_FILE
+            echo "sphinx ${SPHINX_VERSION}.*" >> $PIN_FILE
         fi
     fi
 
@@ -497,11 +489,7 @@ if [[ $SETUP_CMD == *build_sphinx* ]] || [[ $SETUP_CMD == *build_docs* ]]; then
             echo "Installing $package with conda was unsuccessful, using pip instead."
             PIP_PACKAGE_VERSION=$(awk '{print $2}' $PIN_FILE)
             if [[ $(echo $PIP_PACKAGE_VERSION | cut -c 1) =~ $is_number ]]; then
-                if [[ ${PIP_${package}_VERSION} == *">"* || ${PIP_${package}_VERSION} == *"<"* ]]; then
-                   PIP_PACKAGE_VERSION=${PIP_${package}_VERSION}
-                else
-                    PIP_PACKAGE_VERSION='=='${PIP_${package}_VERSION}
-                fi
+                PIP_PACKAGE_VERSION='=='${PIP_${package}_VERSION}
             elif [[ $(echo $PIP_PACKAGE_VERSION | cut -c 1-2) =~ $is_eq_number ]]; then
                 PIP_PACKAGE_VERSION='='${PIP_PACKAGE_VERSION}
             fi
@@ -532,10 +520,18 @@ if [[ ! -z $CONDA_DEPENDENCIES ]]; then
                 echo "Installing the dependency $package with conda was unsuccessful, using pip instead."
                 # We need to remove the problematic package from the pin
                 # file, otherwise further conda install commands may fail,
-                # too.
+                # too. Also we may need to limit the version installed by pip.
+                PIP_PACKAGE_VERSION=$(awk '{print $2}' $PIN_FILE)
+
+                # Deal with as for specific version, otherwise the limitation can be passed on as is
+                if [[ $(echo $PIP_PACKAGE_VERSION | cut -c 1) =~ $is_number ]]; then
+                    PIP_PACKAGE_VERSION='=='${PIP_PACKAGE_VERSION}
+                elif [[ $(echo $PIP_PACKAGE_VERSION | cut -c 1-2) =~ $is_eq_number ]]; then
+                    PIP_PACKAGE_VERSION='='${PIP_PACKAGE_VERSION}
+                fi
                 awk -v package=$package '{if ($1 != package) print $0}' /tmp/pin_copy > /tmp/pin_copy_temp
                 mv /tmp/pin_copy_temp /tmp/pin_copy
-                $PIP_INSTALL $package);
+                $PIP_INSTALL $package${PIP_PACKAGE_VERSION});
         done
         mv /tmp/pin_copy $PIN_FILE))
 fi
