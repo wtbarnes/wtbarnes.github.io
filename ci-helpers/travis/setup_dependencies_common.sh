@@ -207,7 +207,14 @@ retry_on_known_error conda install -c astropy-ci-extras --no-channel-priority $Q
     if [[ ! -z $PYTEST_VERSION ]]; then
         echo "Installing pytest with conda was unsuccessful, using pip instead"
         retry_on_known_error conda install $QUIET $PYTHON_OPTION pip
-        pip install pytest==$PYTEST_VERSION
+        if [[ $(echo $PYTEST_VERSION | cut -c 1) =~ $is_number ]]; then
+            PIP_PYTEST_VERSION='=='${PYTEST_VERSION}
+        elif [[ $(echo $PYTEST_VERSION | cut -c 1-2) =~ $is_eq_number ]]; then
+            PIP_PYTEST_VERSION='='${PYTEST_VERSION}
+        else
+            PIP_PYTEST_VERSION=${PYTEST_VERSION}
+        fi
+        pip install pytest${PIP_PYTEST_VERSION}
         awk '{if ($1 != "pytest") print $0}' $PIN_FILE > /tmp/pin_file_temp
         mv /tmp/pin_file_temp $PIN_FILE
     fi)
@@ -255,14 +262,6 @@ fi
 # Pin required versions for dependencies, howto is in FAQ of conda
 # http://conda.pydata.org/docs/faq.html#pinning-packages
 if [[ ! -z $CONDA_DEPENDENCIES ]]; then
-
-    # On the defaults conda channel mpl currently segfault with newer sip
-    # versions. While it doesn't happen for all python version, there are
-    # many packages running into the issue, so we better have a temporarily
-    # limitation for everything here.
-    if [[ ! -z $(echo $CONDA_DEPENDENCIES | grep matplotlib) ]]; then
-        CONDA_DEPENDENCIES=${CONDA_DEPENDENCIES}" sip<4.19"
-    fi
 
     if [[ -z $(echo $CONDA_DEPENDENCIES | grep '\bmkl\b') ]]; then
         CONDA_DEPENDENCIES=${CONDA_DEPENDENCIES}" nomkl"
@@ -573,6 +572,40 @@ fi
 
 if [[ $MATPLOTLIB_VERSION == pre* ]]; then
     $PIP_INSTALL --pre --upgrade --no-deps matplotlib
+fi
+
+
+# SCIPY_DEV
+
+# We now install Scipy dev - this has to be done last, otherwise conda might
+# install a stable version of matplotlib as a dependency to another package, which
+# would override matplotlib dev.
+
+if [[ $SCIPY_VERSION == dev* ]]; then
+    retry_on_known_error $CONDA_INSTALL Cython
+
+    $PIP_INSTALL git+https://github.com/scipy/scipy.git#egg=scipy --upgrade --no-deps
+fi
+
+if [[ $SCIPY_VERSION == pre* ]]; then
+    $PIP_INSTALL --pre --upgrade --no-deps scipy
+fi
+
+
+# SCIKIT_LEARN DEV
+
+# We now install scikit-learn dev - this has to be done last, otherwise conda might
+# install a stable version of matplotlib as a dependency to another package, which
+# would override matplotlib dev.
+
+if [[ $SCIKIT_LEARN_VERSION == dev* ]]; then
+    retry_on_known_error $CONDA_INSTALL Cython
+
+    $PIP_INSTALL git+https://github.com/scikit-learn/scikit-learn.git#egg=sklearn --upgrade --no-deps
+fi
+
+if [[ $SCIKIT_LEARN_VERSION == pre* ]]; then
+    $PIP_INSTALL --pre --upgrade --no-deps scikit-learn
 fi
 
 # ASTROPY DEV and PRE
