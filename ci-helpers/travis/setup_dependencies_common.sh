@@ -138,7 +138,9 @@ if [[ -z $CONDA_VERSION ]]; then
     CONDA_VERSION=4.5.10
 fi
 
-PIN_FILE_CONDA=$HOME/miniconda/conda-meta/pinned
+if [[ -z $PIN_FILE_CONDA ]]; then
+    PIN_FILE_CONDA=$HOME/miniconda/conda-meta/pinned
+fi
 
 echo "conda ${CONDA_VERSION}" > $PIN_FILE_CONDA
 
@@ -166,6 +168,11 @@ else
     PYTHON_OPTION=""
 fi
 
+# Setting the MPL backend to a default to avoid occational segfaults with the qt backend
+if [[ ! -z $MPLBACKEND ]]; then
+    export MPLBACKEND=Agg
+fi
+
 # CONDA
 if [[ -z $CONDA_ENVIRONMENT ]]; then
     retry_on_known_error conda create $QUIET -n test $PYTHON_OPTION
@@ -175,7 +182,10 @@ fi
 source activate test
 
 # PIN FILE
-PIN_FILE=$HOME/miniconda/envs/test/conda-meta/pinned
+if [[ -z $PIN_FILE ]]; then
+    PIN_FILE=$HOME/miniconda/envs/test/conda-meta/pinned
+fi
+
 # ensure the PIN_FILE exists
 touch $PIN_FILE
 
@@ -198,6 +208,8 @@ if [[ ! -z $PIP_VERSION ]]; then
     echo "pip ${PIP_VERSION}.*" >> $PIN_FILE
 fi
 
+export PIP_INSTALL='python -m pip install'
+
 # We use the channel astropy-ci-extras to host pytest 2.7.3 that is
 # compatible with LTS 1.0.x astropy. We need to disable channel priority for
 # this step to make sure the latest version is picked up when
@@ -214,7 +226,7 @@ retry_on_known_error conda install -c astropy-ci-extras --no-channel-priority $Q
         else
             PIP_PYTEST_VERSION=${PYTEST_VERSION}
         fi
-        pip install pytest${PIP_PYTEST_VERSION}
+        $PIP_INSTALL pytest${PIP_PYTEST_VERSION}
         awk '{if ($1 != "pytest") print $0}' $PIN_FILE > /tmp/pin_file_temp
         mv /tmp/pin_file_temp $PIN_FILE
     fi)
@@ -225,10 +237,8 @@ retry_on_known_error conda install -c astropy-ci-extras --no-channel-priority $Q
 # This update should not interfere with the rest of the functionalities
 # here.
 if [[ -z $PIP_VERSION ]]; then
-    pip install --upgrade pip
+    $PIP_INSTALL --upgrade pip
 fi
-
-export PIP_INSTALL='pip install'
 
 # PEP8
 # PEP8 has been renamed to pycodestyle, keep both here for now
@@ -263,7 +273,8 @@ fi
 # http://conda.pydata.org/docs/faq.html#pinning-packages
 if [[ ! -z $CONDA_DEPENDENCIES ]]; then
 
-    if [[ -z $(echo $CONDA_DEPENDENCIES | grep '\bmkl\b') ]]; then
+    if [[ -z $(echo $CONDA_DEPENDENCIES | grep '\bmkl\b') &&
+            $TRAVIS_OS_NAME != windows ]]; then
         CONDA_DEPENDENCIES=${CONDA_DEPENDENCIES}" nomkl"
     fi
 
@@ -310,7 +321,8 @@ fi
 
 
 MKL='nomkl'
-if [[ ! -z $(echo $CONDA_DEPENDENCIES | grep '\bmkl\b') ]]; then
+if [[ ! -z $(echo $CONDA_DEPENDENCIES | grep '\bmkl\b') ||
+        $TRAVIS_OS_NAME == windows ]]; then
     MKL=''
 fi
 
