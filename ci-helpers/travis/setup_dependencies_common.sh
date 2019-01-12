@@ -100,12 +100,12 @@ fi
 # We will use the 2.0.x releases as "stable" for Python 2.7 and 3.4
 if [[ $(python -c "from distutils.version import LooseVersion; import os;\
         print(LooseVersion(os.environ['PYTHON_VERSION']) < '3.5')") == False ]]; then
-    export LATEST_ASTROPY_STABLE=3.1
+    export LATEST_ASTROPY_STABLE=3.1.1
 else
-    export LATEST_ASTROPY_STABLE=2.0.10
+    export LATEST_ASTROPY_STABLE=2.0.11
     export NO_PYTEST_ASTROPY=True
 fi
-export ASTROPY_LTS_VERSION=2.0.10
+export ASTROPY_LTS_VERSION=2.0.11
 export LATEST_NUMPY_STABLE=1.15
 export LATEST_SUNPY_STABLE=0.9.2
 
@@ -327,6 +327,11 @@ if [[ ! -z $(echo $CONDA_DEPENDENCIES | grep '\bmkl\b') ||
 fi
 
 if [[ $NUMPY_VERSION == dev* ]]; then
+    # We use C99 to build Numpy.
+    # If CFLAGS already defined by calling pkg, it's up to them to set this.
+    if [[ -z $CFLAGS ]]; then
+        export CFLAGS="-std=c99"
+    fi
     # We install nomkl here to make sure that Numpy and Scipy versions
     # installed subsequently don't depend on the MKL. If we don't do this, then
     # we run into issues when we install the developer version of Numpy
@@ -699,12 +704,12 @@ fi
 if [[ $SETUP_CMD == *coverage* ]]; then
     # We install requests with conda since it's required by coveralls.
     retry_on_known_error $CONDA_INSTALL coverage requests
-    $PIP_INSTALL coveralls
+    $PIP_INSTALL coveralls codecov
 fi
 
 if [[ $SETUP_CMD == *--cov* ]]; then
     retry_on_known_error $CONDA_INSTALL pytest-cov
-    $PIP_INSTALL coveralls
+    $PIP_INSTALL coveralls codecov
 fi
 
 

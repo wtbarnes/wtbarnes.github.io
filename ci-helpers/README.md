@@ -1,8 +1,6 @@
 About
 -----
 
-[![Join the chat at https://gitter.im/astropy/ci-helpers](https://badges.gitter.im/astropy/ci-helpers.svg)](https://gitter.im/astropy/ci-helpers?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 [![Build Status](https://travis-ci.org/astropy/ci-helpers.svg?branch=master)](https://travis-ci.org/astropy/ci-helpers)
 [![Build status](https://ci.appveyor.com/api/projects/status/4mqtucv6ks4peakf/branch/master?svg=true)](https://ci.appveyor.com/project/Astropy/ci-helpers/branch/master)
 
@@ -69,8 +67,8 @@ environment variables
   In addition, if ``SETUP_CMD`` contains the following flags, extra dependencies
   are installed:
 
-    * ``--coverage``: the coverage and coveralls packages are installed
-    * ``--cov``: the pytest-cov and coveralls packages are installed
+    * ``--coverage``: the coverage, coveralls, and codecov packages are installed
+    * ``--cov``: the pytest-cov, coveralls, and codecov packages are installed
     * ``--parallel`` or ``--numprocesses``: the pytest-xdist package is
       installed
     * ``--open-files``: the psutil package is installed
