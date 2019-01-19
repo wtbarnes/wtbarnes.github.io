@@ -135,7 +135,7 @@ fi
 # We pin the version for conda as it's not the most stable package from
 # release to release. Add note here if version is pinned due to a bug upstream.
 if [[ -z $CONDA_VERSION ]]; then
-    CONDA_VERSION=4.5.10
+    CONDA_VERSION=4.5.12
 fi
 
 if [[ -z $PIN_FILE_CONDA ]]; then
@@ -472,13 +472,6 @@ if [[ $SETUP_CMD == *build_sphinx* ]] || [[ $SETUP_CMD == *build_docs* ]]; then
     # account
     if [[ -z $SIP_VERSION ]]; then
         echo "sip <4.19" >> $PIN_FILE
-    fi
-
-    # Temporary version limitation until
-    # https://github.com/sphinx-doc/sphinx/issues/4689 (affecting 1.7) is
-    # addressed and a new version of sphinx is released.
-    if [[ -z $SPHINX_VERSION ]]; then
-        SPHINX_VERSION='<1.7'
     fi
 
     if [[ ! -z $SPHINX_VERSION ]]; then
