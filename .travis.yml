@@ -16,6 +16,7 @@ addons:
     - sourceline: 'ppa:jonathonf/texlive'
     packages:
     - texlive
+    - texlive-xetex
     - texlive-fonts-recommended
     - texlive-fonts-extra
 
