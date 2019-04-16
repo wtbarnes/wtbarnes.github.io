@@ -15,10 +15,10 @@ addons:
     sources:
     - sourceline: 'ppa:jonathonf/texlive'
     packages:
-    - texlive
-    - texlive-xetex
-    - texlive-fonts-recommended
-    - texlive-fonts-extra
+    - texlive-full
+#    - texlive-xetex
+#    - texlive-fonts-recommended
+#    - texlive-fonts-extra
 
 install:
 - pip install PyYaml jinja2 doctr
