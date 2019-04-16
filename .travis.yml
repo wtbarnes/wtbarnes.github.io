@@ -19,7 +19,7 @@ install:
 - git clone --depth 1 git://github.com/astropy/ci-helpers.git
 - source ci-helpers/travis/setup_conda.sh
 - PATH=$HOME/texlive/bin/x86_64-linux:$PATH
-- tlmgr update --self
+#- tlmgr update --self
 - tlmgr install collection-fontsrecommended
 - tlmgr install collection-fontsextra
 - gem install bundler
