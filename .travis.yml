@@ -1,5 +1,6 @@
 dist: trusty
-language: c
+language: python #c
+python: 3.6
 branches:
   only:
   - sources
@@ -7,17 +8,18 @@ sudo: false
 
 env:
   global:
-    - PYTHON_VERSION=3.6
-    - PIP_DEPENDENCIES='doctr'
-    - CONDA_DEPENDENCIES='PyYaml jinja2'
-    - EVENT_TYPE='pull_request push cron'
+    #- PYTHON_VERSION=3.6
+    #- PIP_DEPENDENCIES='doctr'
+    #- CONDA_DEPENDENCIES='PyYaml jinja2'
+    #- EVENT_TYPE='pull_request push cron'
     - secure: "ynaTam1madBRwY/zDo7VDWk8LFxeKUjpO+K+h6fubPZbr+SN3Iiax+gK8q1sHsjzK7T0wdj2tIHEg8XVppbx1Dw7mm822Kpa3PodjkObx0PDpYB7B3yVyaj3EvpSCpi4lTmGUZR4mxN7zCpKgK1A+hxP/RX/ExxZ5WegbK9Tn5RdcWMfIcZpRf7UOuNL8WZWEo6ayqZsDGX/WeB4zKHOZfWgzYinqbcxl5HiHKzFIMIooQxbpI7ZFZgzOjSMCBkdcelOsTMjp9xiGQfr8pi9X9ExLzmfoMlBx31SMfAnqezUquu9iD8cGDzhcwvwzKIo8NjXOCzyLBxsvMFSg3ADKlP2qWAPZ3YPUpWL3EVk6hDa6U0rY/q76cJPr1RTb+8TT/LZIXD1PDBqR6WiOMZKrOQhxYlKhWlEu2OjJThZRtaCSdglEuh+V1ofHPld8J9R42XtGrAn8aA7J1hEvNvukxkf1pyGati8QgsHoq0U2UkC/M8z2gtAaJAGf96PFP/IQu0ukkcSkW/oTeXTGhbQtsmT/N1vHYcDvIMZEde1UkGdje7nmkCLqbzuk1LJe+n5/gms+VaDOEAwquOe2/PquQbwqd6/LQfnhtrLKezQKD8yS7INa1vZC6/iaY3W6TSP1uGaLT03OaaE60MmyNNldw/JCTH4RQP0+zlpEHeUepo="
 
 before_install:
 - mkdir -p $HOME/texlive && curl -L https://github.com/urdh/texlive-blob/releases/download/20181009/texlive.tar.xz | tar -JxC $HOME/texlive
 install:
-- git clone --depth 1 git://github.com/astropy/ci-helpers.git
-- source ci-helpers/travis/setup_conda.sh
+- pip install PyYaml jinja2 doctr
+#- git clone --depth 1 git://github.com/astropy/ci-helpers.git
+#- source ci-helpers/travis/setup_conda.sh
 - PATH=$HOME/texlive/bin/x86_64-linux:$PATH
 #- tlmgr update --self
 #- tlmgr install collection-fontsrecommended
@@ -33,5 +35,5 @@ script:
 - set -e
 - bundle exec jekyll build --destination www
 # Doctr gets angry if this repo is still around
-- rm -rf ci-helpers
+#- rm -rf ci-helpers
 - doctr deploy . --built-docs www/ --deploy-branch-name master --no-require-master
