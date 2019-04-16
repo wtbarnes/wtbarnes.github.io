@@ -7,20 +7,6 @@
 ./LICENSE
 ./Projects/index.html
 ./README.md
-./ci-helpers/LICENSE.rst
-./ci-helpers/README.md
-./ci-helpers/appveyor.yml
-./ci-helpers/appveyor/install-miniconda.ps1
-./ci-helpers/appveyor/pinned
-./ci-helpers/appveyor/windows_sdk.cmd
-./ci-helpers/conda_environment.yml
-./ci-helpers/test_env.py
-./ci-helpers/travis/setup_conda.sh
-./ci-helpers/travis/setup_conda_linux.sh
-./ci-helpers/travis/setup_conda_osx.sh
-./ci-helpers/travis/setup_conda_windows.sh
-./ci-helpers/travis/setup_dependencies_common.sh
-./ci-helpers/utils/import_submodules.py
 ./css/custom.css
 ./css/rouge.base16.syntax.css
 ./css/rouge.github.syntax.css
@@ -28,5 +14,4 @@
 ./images/about_me.png
 ./images/favicon.png
 ./index.html
-./miniconda.sh
 ./static_files/cv.pdf
