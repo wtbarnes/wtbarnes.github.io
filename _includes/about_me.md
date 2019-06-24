@@ -1,10 +1,10 @@
 <p class="lead">
 
-My name is Will Barnes. I'm currently a PhD student in the [Department of Physics and Astronomy at Rice University](http://www.physics.rice.edu/) where I am a member of the [Solar Physics research group](http://solar.rice.edu/).
+My name is Will Barnes. I'm currently a postdoctoral researcher at the Lockheed Martin Solar and Astrophysics Laboratory in Palo Alto, California where I'm building software tools to analyze data from the [Atmospheric Imaging Assembly](https://en.wikipedia.org/wiki/Solar_Dynamics_Observatory#Atmospheric_Imaging_Assembly_(AIA)). In May of 2019, I completed my PhD in the [Department of Physics and Astronomy at Rice University](http://www.physics.rice.edu/) under the direction of Dr. Stephen Bradshaw. My dissertation, *Diagnosing the Frequency of Energy Deposition in the Magnetically-Closed Solar Corona*, can be found [here](https://github.com/wtbarnes/dissertation/releases).
 
 <br><br>
 
-The focus of my PhD research is the solar corona, the outermost layer of the Sun's atmosphere. In particular, I create simulations of [coronal loops](https://www.nasa.gov/content/coronal-loops-in-an-active-region-of-the-sun), huge arcs of million-degree plasma suspended high above the solar surface, to try and better understand how the coronal plasma is heated to [temperatures orders of magnitude hotter than the solar surface](https://science.nasa.gov/news-articles/the-mystery-of-coronal-heating). 
+My primary research interest is the heating of the solar corona, the outermost layer of the Sun's atmosphere. In particular, I create simulations of [coronal loops](https://www.nasa.gov/content/coronal-loops-in-an-active-region-of-the-sun), huge arcs of million-degree plasma suspended high above the solar surface, to try and better understand how the coronal plasma is heated to [temperatures orders of magnitude hotter than the solar surface](https://science.nasa.gov/news-articles/the-mystery-of-coronal-heating). 
 
 <br><br>
 
