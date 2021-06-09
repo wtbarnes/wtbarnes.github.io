@@ -28,6 +28,7 @@ jobs:
           cd resume
           make html PDF_LINK="{{site.url}}/static_files/cv.pdf"
           cp output/cv.html ../_includes/cv.html
+          make install_tex
           make tex
           cd ..
       - name: Build PDF
