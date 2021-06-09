@@ -1,0 +1,47 @@
+name: Publish
+on:
+  push:
+    branches: [source]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.1
+      - name: Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '2.x'
+      - name: Python 
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install
+        run: |
+          pip install PyYaml jinja2
+          gem install bundler
+          bundle install
+      - name: Build Resume
+        run: |
+          cd resume
+          make html PDF_LINK="{{site.url}}/static_files/cv.pdf"
+          cp output/cv.html ../_includes/cv.html
+          make tex
+          cd ..
+      - name: Build PDF
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: cv.tex
+          working_directory: resume/output
+          latexmk_use_xelatex: true
+      - name: Move PDF
+        run: |
+          mkdir static_files
+          cp resume/output/cv.pdf static_files/
+      - name: Build Site
+        run: bundle exec jekyll build --destination www
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: master
+          folder: www
