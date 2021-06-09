@@ -1,5 +1,5 @@
 # wtbarnes.github.io
-[![Build Status](https://travis-ci.org/wtbarnes/wtbarnes.github.io.svg?branch=sources)](https://travis-ci.org/wtbarnes/wtbarnes.github.io)
+[![CI](https://github.com/wtbarnes/wtbarnes.github.io/workflows/Publish/badge.svg)](https://github.com/wtbarnes/wtbarnes.github.io/actions)
 
 My personal webpage
 

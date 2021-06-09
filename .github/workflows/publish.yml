@@ -3,11 +3,13 @@ on:
   push:
     branches: [sources]
 jobs:
-  build-and-deploy:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
       - name: Ruby
         uses: actions/setup-ruby@v1
         with:
