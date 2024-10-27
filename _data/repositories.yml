@@ -1,12 +1,10 @@
 github_users:
-  - torvalds
-  - alshedivat
+  - wtbarnes
 
 github_repos:
-  - alshedivat/al-folio
-  - twbs/bootstrap
-  - jekyll/jekyll
-  - jquery/jquery
-  - FortAwesome/Font-Awesome
-  - jpswalsh/academicons
-  - mathjax/MathJax
+  - wtbarnes/fiasco
+  - wtbarnes/synthesizAR
+  - wtbarnes/hissw
+  - sunpy/sunpy
+  - rice-solar-physics/ebtelPlusPlus
+  - LM-SAL/aiapy/

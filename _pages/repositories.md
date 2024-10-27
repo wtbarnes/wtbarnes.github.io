@@ -1,14 +1,11 @@
 ---
 layout: page
 permalink: /repositories/
-title: repositories
-description: Edit the `_data/repositories.yml` and change the `github_users` and `github_repos` lists to include your own GitHub profile and repositories.
+title: software
+description: Below is a list of some of the more active open-source projects to which I contribute. Nearly every piece of software I produce is developed openly on GitHub. You can find a complete list of my repositories by clicking on my profile below.
 nav: true
 nav_order: 4
 ---
-
-## GitHub users
-
 {% if site.data.repositories.github_users %}
 
 <div class="repositories d-flex flex-wrap flex-md-row flex-column justify-content-between align-items-center">
@@ -34,8 +31,6 @@ nav_order: 4
 {% endfor %}
 {% endif %}
 {% endif %}
-
-## GitHub Repositories
 
 {% if site.data.repositories.github_repos %}
 
